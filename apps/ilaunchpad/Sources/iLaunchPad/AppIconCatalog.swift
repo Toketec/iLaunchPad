@@ -9,9 +9,9 @@ enum AppIconCatalog {
         let name: String
     }
     static let choices = [
-        Choice(id: "ocean", name: "海蓝玻璃"), Choice(id: "violet", name: "紫晶星际"),
-        Choice(id: "obsidian", name: "曜石夜航"),
-        Choice(id: "porcelain", name: "白瓷石墨")
+        Choice(id: "ocean", name: "玻璃蓝"), Choice(id: "violet", name: "玻璃紫"),
+        Choice(id: "obsidian", name: "玻璃黑 · 亮底"),
+        Choice(id: "porcelain", name: "玻璃白 · 暗底")
     ]
 
     static func normalizedID(_ id: String?) -> String {
