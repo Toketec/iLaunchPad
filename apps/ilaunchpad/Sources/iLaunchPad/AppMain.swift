@@ -191,7 +191,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var scrollUsesHorizontal: Bool?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        UserDefaults.standard.register(defaults: ["returnToFirstPage": true])
+        UserDefaults.standard.register(defaults: ["returnToFirstPage": true, "appIconStyle": AppIconCatalog.defaultID])
+        let savedIconID = UserDefaults.standard.string(forKey: "appIconStyle")
+        let iconID = AppIconCatalog.normalizedID(savedIconID)
+        if iconID != savedIconID { UserDefaults.standard.set(iconID, forKey: "appIconStyle") }
+        AppIconCatalog.apply(iconID)
         let loginLaunch = LoginItemController.isLoginLaunch(NSAppleEventManager.shared().currentAppleEvent)
         NSApp.setActivationPolicy(.regular)
         configureMenu()

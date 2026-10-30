@@ -12,6 +12,7 @@
 - FolderOverlay.swift：只有偏好作用范围确认后统一组内规则
 - AppIconCatalog.swift、AppMain.swift：消费稳定图标 ID、资源读取、启动恢复、缺失回退及默认偏好注册
 - LaunchpadSettingsView.swift：展示图标目录、选中反馈与辅助功能标签
+- 图标视觉原稿、发布素材、封装工具与目录生产由冲刺 2 spec-001 负责；本规格只依赖其稳定目录契约
 
 ## 实施/复原顺序
 

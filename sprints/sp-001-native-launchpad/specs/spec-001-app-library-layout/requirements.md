@@ -19,7 +19,7 @@
 
 ApplicationScanner 扫描 /Applications、/System/Applications、当前用户 Applications；跳过隐藏文件和 .app 包内部，读取 Bundle ID/显示名，按本地化名称排序。LayoutStore.normalize 按非空 Bundle ID、否则 App ID 去重。普通组/文件夹/页的身份与 App ID 分开；数组次序代表排序。
 
-LayoutStore.groups(on:)、allApps()、group(id:) 是消费者入口；resolvedURL 先检查路径，再由 NSWorkspace 按 Bundle ID 解析。刷新只补未见 Bundle ID/路径的 App，不改旧位置；逐个追加到首个不足35格的页面末尾，全部满才新增页。ApplicationDirectoryMonitor以原生FSEvents监听三个扫描根目录及子目录，主队列接收事件、1秒去抖后台扫描，并在5秒后补一次核对以覆盖安装过程；无事件不轮询。每次唤起补充核对（20秒节流，扫描中不重启）。仅生产Store启动监听，隔离测试不监听真实目录；仍沿用代次及拖拽延后合并。外部卸载同步不属于此次补入能力。
+LayoutStore.groups(on:)、allApps()、group(id:) 是消费者入口；resolvedURL 先检查路径，再由 NSWorkspace 按 Bundle ID 解析。刷新只补未见 Bundle ID/路径的 App，不改旧位置；逐个追加到首个不足35格的页面末尾，全部满才新增页。ApplicationDirectoryMonitor以原生FSEvents监听三个扫描根目录及子目录，主队列接收事件、1秒去抖后台扫描，并在5秒后补一次核对以覆盖安装过程；目录事件同时失效图标内存/磁盘缓存，现有网格收到通知后按资源指纹重新取图。每次唤起补充核对（20秒节流，扫描中不重启），呈现时优先读取运行中应用的当前图标。仅生产Store启动监听，隔离测试不监听真实目录；仍沿用代次及拖拽延后合并。外部卸载同步不属于此次补入能力。
 
 ### 自有布局与保存
 

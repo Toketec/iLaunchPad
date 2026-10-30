@@ -28,7 +28,7 @@ LayoutStore修改、JSON保存及UI在MainActor；扫描由串行ScanWorker执�
 | showNames | true | 显示应用名称 |
 | returnToFirstPage | true | 未配置时回首页，保留用户显式false（记忆上次页） |
 | lastPage | 0 | 记住页面，显示时按实际页数校正 |
-| appIconStyle | graphite | 十款应用标识的稳定ID；Dock和应用切换器使用，访达保留包默认图标 |
+| appIconStyle | ocean | 四款应用标识的稳定 ID；未知或已删除 ID 自动迁移到 ocean，Dock 和应用切换器使用，访达保留海蓝包图标 |
 
 布局位置为用户 Library/Application Support/iLaunchPad/layout.json；可选兼容源为同级 LaunchOS/LaunchOS.sqlite。偏好走 AppStorage 即时更新。图标存在性通过刷新清空；缓存目录为用户Caches/local.ilaunchpad.app/VisualResources/v1。图标键包含身份、规范路径、版本/资源指纹、256px规格、外观及系统版本；壁纸键包含源指纹、屏幕与模糊半径。重新显示后台复核。登录开关不另存UserDefaults，requiresApproval/notFound/操作错误如实反馈。包最低系统和版本字段见工程 Resources/Info.plist。无环境变量配置模板需要填写。
 

@@ -1,0 +1,27 @@
+{
+  "mode": "built-in image_gen",
+  "useCase": "logo-brand",
+  "brief": "One original diagonal rocket family with four user-selected themes. All four use matching rocket proportions and restrained material glow. Ocean is the package default and fallback. No text or watermark.",
+  "variants": [
+    {
+      "id": "violet",
+      "design": "Purple rocket enlarged to the shared family proportion on pale lavender-white glass, with a coral-orange flame and restrained violet inner bloom",
+      "source": "violet.png"
+    },
+    {
+      "id": "ocean",
+      "design": "Ocean-blue default rocket with marine-to-cyan depth, reduced sea-glass bloom, warm coral-orange flame and a single clean upper-right rim highlight",
+      "source": "ocean.png"
+    },
+    {
+      "id": "obsidian",
+      "design": "Luminous blue rocket on deep obsidian liquid glass with restrained perimeter reflections and reduced flame spill",
+      "source": "obsidian.png"
+    },
+    {
+      "id": "porcelain",
+      "design": "Graphite rocket on restrained warm-white porcelain glass with reduced corner bloom, subtle cool-gray depth and a warm coral-orange flame",
+      "source": "porcelain.png"
+    }
+  ]
+}

@@ -46,6 +46,7 @@ final class ApplicationIconCache {
     static let shared = ApplicationIconCache()
     private let images = NSCache<NSString, NSImage>()
     private var availability: [String: Bool] = [:]
+    private var keysByBundleIdentifier: [String: Set<String>] = [:]
     private var pending: [String: Task<Void, Never>] = [:]
     private var generation = 0
     private var invalidation: Task<Void, Never>?
@@ -60,6 +61,7 @@ final class ApplicationIconCache {
         pending.removeAll()
         images.removeAllObjects()
         availability.removeAll()
+        keysByBundleIdentifier.removeAll()
         let previous = invalidation
         invalidation = Task {
             await previous?.value
@@ -75,9 +77,10 @@ final class ApplicationIconCache {
 
     func image(for app: LaunchApp, store: LayoutStore = .shared) -> NSImage {
         let key = Self.key(app)
+        keysByBundleIdentifier[app.bundleIdentifier, default: []].insert(key)
         if let image = images.object(forKey: key as NSString) { return image }
         request(app)
-        return placeholder
+        return images.object(forKey: key as NSString) ?? placeholder
     }
 
     @discardableResult
@@ -85,6 +88,11 @@ final class ApplicationIconCache {
         let key = Self.key(app)
         if let task = pending[key] { return task }
         if !revalidate, images.object(forKey: key as NSString) != nil { return nil }
+        if let image = liveIcon(for: app) {
+            store(image, for: app)
+            if revalidate { NotificationCenter.default.post(name: .launchpadIconReady, object: key) }
+            return nil
+        }
         let token = generation
         let barrier = invalidation
         let task = Task { [weak self] in
@@ -104,6 +112,33 @@ final class ApplicationIconCache {
         }
         pending[key] = task
         return task
+    }
+
+    func updateRuntimeIcon(_ image: NSImage, bundleIdentifier: String) {
+        for key in keysByBundleIdentifier[bundleIdentifier] ?? [] {
+            pending[key]?.cancel()
+            pending[key] = nil
+            availability[key] = true
+            images.setObject(image.copy() as? NSImage ?? image, forKey: key as NSString)
+            NotificationCenter.default.post(name: .launchpadIconReady, object: key)
+        }
+    }
+
+    private func liveIcon(for app: LaunchApp) -> NSImage? {
+        if app.bundleIdentifier == Bundle.main.bundleIdentifier {
+            return NSApp.applicationIconImage?.copy() as? NSImage
+        }
+        return NSWorkspace.shared.runningApplications
+            .first(where: { $0.bundleIdentifier == app.bundleIdentifier })?.icon?.copy() as? NSImage
+    }
+
+    private func store(_ image: NSImage, for app: LaunchApp) {
+        let key = Self.key(app)
+        keysByBundleIdentifier[app.bundleIdentifier, default: []].insert(key)
+        pending[key]?.cancel()
+        pending[key] = nil
+        availability[key] = true
+        images.setObject(image.copy() as? NSImage ?? image, forKey: key as NSString)
     }
 
     func warm(_ apps: [LaunchApp], revalidate: Bool = false) async {

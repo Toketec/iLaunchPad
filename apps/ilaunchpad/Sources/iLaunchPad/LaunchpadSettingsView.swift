@@ -6,6 +6,7 @@ struct LaunchpadSettingsView: View {
     @AppStorage("wallpaperBlur") private var wallpaperBlur = 24.0
     @AppStorage("showNames") private var showNames = true
     @AppStorage("returnToFirstPage") private var returnToFirstPage = true
+    @AppStorage("appIconStyle") private var appIconStyle = AppIconCatalog.defaultID
 
     var body: some View {
         TabView {
@@ -35,6 +36,36 @@ struct LaunchpadSettingsView: View {
             .formStyle(.grouped)
             .tabItem { Label("外观", systemImage: "paintpalette") }
 
+            ScrollView {
+                VStack(alignment: .leading, spacing: 18) {
+                    Text("选择你的火箭").font(.title2.bold())
+                    Text("用于 Dock 与应用切换器，选择后即时生效并保留。访达显示默认海蓝图标。")
+                        .font(.callout).foregroundStyle(.secondary)
+                    LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 5), spacing: 20) {
+                        ForEach(AppIconCatalog.choices) { choice in
+                            Button {
+                                appIconStyle = choice.id
+                                AppIconCatalog.apply(choice.id)
+                            } label: {
+                                VStack(spacing: 7) {
+                                    if let image = AppIconCatalog.image(for: choice.id) {
+                                        Image(nsImage: image).resizable().scaledToFit().frame(width: 70, height: 70)
+                                    }
+                                    Text(choice.name).font(.caption)
+                                    Image(systemName: appIconStyle == choice.id ? "checkmark.circle.fill" : "circle")
+                                        .foregroundStyle(appIconStyle == choice.id ? Color.accentColor : Color.secondary)
+                                }
+                                .frame(maxWidth: .infinity).padding(.vertical, 8)
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel(choice.name)
+                            .accessibilityValue(appIconStyle == choice.id ? "已选择" : "未选择")
+                        }
+                    }
+                }
+                .padding(20)
+            }
+            .tabItem { Label("应用图标", systemImage: "app.badge") }
 
             Form {
                 Section("打开与浏览") {
@@ -73,7 +104,10 @@ struct LaunchpadSettingsView: View {
         }
         .padding(12)
         .frame(width: 510, height: 480)
-        .onAppear { loginItem.refresh() }
+        .onAppear {
+            loginItem.refresh()
+            appIconStyle = AppIconCatalog.normalizedID(appIconStyle)
+        }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
             loginItem.refresh()
         }

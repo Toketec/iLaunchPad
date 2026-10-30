@@ -181,6 +181,7 @@ final class LayoutStore: ObservableObject {
         }
         normalize()
         directoryMonitor = ApplicationDirectoryMonitor(roots: ApplicationScanner.roots) { [weak self] in
+            ApplicationIconCache.shared.clear()
             self?.refreshInstalledApplications()
         }
         refreshInstalledApplications()
