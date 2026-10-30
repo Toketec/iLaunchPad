@@ -1,0 +1,7 @@
+# SwiftPM 与本地构建产物
+**/.build/
+**/.swiftpm/
+**/dist/
+.DS_Store
+*.local
+.env
