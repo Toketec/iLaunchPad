@@ -2,20 +2,15 @@
 
 ## 项目专属约束与入口
 
-- 访问网络使用代理 `127.0.0.1:7890`。
-- 目标明确时只完成目标；不做无意义检查，除非对整个系统有潜在风险。迁移门禁属于本次 migrate 的必要工作。
-- 简单明确的事情务必在 2 分钟内完成并回复；复杂迁移及时报告进度。
-- 禁止修改已安装技能及其项目模板源文件；本项目 `_template` 仅保留原样副本。
 - 原生客户端工程在 `apps/ilaunchpad/`，含 `Package.swift`、`Sources/`、`Tests/`、`Resources/`、`Scripts/`、`Tools/`，由 SwiftPM 管理内部布局。
 - 根目录构建入口：`./apps/ilaunchpad/Scripts/build-app.sh`；产物：`apps/ilaunchpad/dist/iLaunchPad.app`。
-- 用户已授权：后续应用修改完成且构建成功后，自动备份并替换 `/Applications/iLaunchPad.app`，启动新版供测试，无需再次询问安装；保留用户布局，不自动导入或重置数据。构建失败不得覆盖已安装版本。
+- 产品与实现记录：`sprints/sp-001-native-launchpad/`；只有一个既有客户端，`businesses/` 与 `tools/` 无独立运行单元。
 - 冲刺 1 按用户确认的七个功能板块维护规格：001 应用目录/布局/双来源导入，002 唤起与系统，003 浏览/搜索/启动，004 文件夹，005 连续拖拽/排序，006 编辑/移除，007 偏好。每个板块包含细功能、边界与验收；常规 bug 回到所属规格更新，不为每个问题另建规格。只有新的独立功能边界经用户确认后才扩拆。
 - 冲刺 1 在历史里程碑使用用户确认的白底石墨火箭作为初始包图标，spec-007 只负责图标选择的运行时偏好；当前四款玻璃主题、玻璃蓝默认包图标与发布封装归冲刺 2 spec-001。
 - 细功能唯一入口为 `docs/functional-overview.md`（相对冲刺根），规则见同级 `SPRINT-features.md`；实现程度及证据只写所属 spec 的 tasks/check。文档整理不触发构建或自动安装。
 - 布局导入目标同时包括 LaunchOS 和 macOS 26 以前系统 Launchpad 的遗留数据/备份；当前仅有 LaunchOS 实现。旧系统接受定义必须经样本核对后形成，不得猜表名或把文档目标声称为已有能力。
 - 包基线为 2.3.2/build 12。用户已确认进组松手问题解决，具体范围与其他未验项见 spec-005/check；不得将已撤回的 2.3.3、构建成功或局部确认当成全功能验收。
-- 用户布局在当前用户的 `Library/Application Support/iLaunchPad/layout.json`，LaunchOS 数据库只读；结构迁移不操作用户数据或已安装应用。
-- 原目录没有 Git 历史。未经明确授权不创建提交、推送或补造历史验收。存量 Retrospec 可依据现有代码补录，但不能据此假定新功能方案已评审。
+- 用户布局位于 `~/Library/Application Support/iLaunchPad/layout.json`，LaunchOS 数据库只读；结构迁移不操作用户数据或已安装应用。
 
 > **AI 协作入口** — 本文档定义了完整的 SSOT 规格驱动开发流程，AI 在协作时必须遵守。
 
@@ -315,7 +310,7 @@ project-root/
 │       └── adr-0001-决策名.md
 │
 ├── apps/                      # ★ 前端/客户端应用（纯代码域，规格在 sprint 内）
-│   ├── ilaunchpad/            # SwiftPM 原生客户端；含源码、测试、资源和本应用构建工具
+│   └── ilaunchpad/            # SwiftPM 原生客户端；含源码、测试、资源和本应用构建工具
 │
 ├── businesses/                # ★ 后端业务服务（纯代码域）
 │   └── .gitkeep               # 当前没有后端服务

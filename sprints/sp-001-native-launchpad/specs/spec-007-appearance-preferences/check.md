@@ -39,7 +39,7 @@
 
 待实施后的收口：记录相同布局/屏幕下无缓存新进程、磁盘缓存新进程、常驻唤起各至少10次；分别报告可交互时间、p50/p95/p99帧时、最长主线程停顿及样本数。少量启动样本只报中位数和范围，不夸大尾延迟精度。使用系统性能工具记录真实呈现/卡顿与主线程，显示回调次数仅用于检查时钟。另覆盖多屏、系统节能/减少动态效果、缓存失效和跨容器真实拖拽；不以视觉降级换分数。当前这些性能收口未执行。
 
-平台依据（通过127.0.0.1:7890读取Apple文档）：[SMAppService.mainApp](https://developer.apple.com/documentation/servicemanagement/smappservice/mainapp)、[NSWindow.displayLink](https://developer.apple.com/documentation/appkit/nswindow/displaylink(target:selector:))、[preferredFrameRateRange](https://developer.apple.com/documentation/quartzcore/cadisplaylink/preferredframeraterange)。登录项是用户登录后启动，不是登录前系统守护服务；显示同步受系统刷新率、负载与节能策略约束。
+平台依据：[SMAppService.mainApp](https://developer.apple.com/documentation/servicemanagement/smappservice/mainapp)、[NSWindow.displayLink](https://developer.apple.com/documentation/appkit/nswindow/displaylink(target:selector:))、[preferredFrameRateRange](https://developer.apple.com/documentation/quartzcore/cadisplaylink/preferredframeraterange)。登录项是用户登录后启动，不是登录前系统守护服务；显示同步受系统刷新率、负载与节能策略约束。
 
 ## 本次实施验收边界
 

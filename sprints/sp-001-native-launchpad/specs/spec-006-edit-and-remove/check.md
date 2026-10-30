@@ -93,7 +93,7 @@ Safari 是另外一个明确保护项：/Applications/Safari.app 是带 restrict
 - 本机只读确认Pages与Xcode文件可删除；Safari表面路径虽报告可删除，但因符号链接解析后路径不一致仍被资格规则拒绝；Mail位于系统目录且不可删除。
 - ApplicationRemoval已移除App Store收据、系统Apps/Settings交接、卸载器发现/签名校验和外部待核对状态。确认后只调用FileManager.trashItem，成功才调用removeUninstalledApplication。
 - NativeLaunchGrid已将图标、名称、文件夹材质和叉号放在同一个contentView中，只对该共同容器添加editingWiggle；发布编译通过。真实相位与命中仍待用户复验。
-- 已备份并替换/Applications/iLaunchPad.app后启动新版；安装备份位于/Users/wst/Library/Application Support/iLaunchPad-install-backup.pXT2Ml/，产物与安装二进制一致。安装前后布局差异仅为本机应用清单变化：/Applications/Trae.app已不存在，对应TraeCode项消失；19:22新出现的/Applications/Doubao.app以豆包追加到末页。未用旧备份覆盖当前真实清单。
+- 已备份并替换本机 `/Applications/iLaunchPad.app` 后启动新版；安装备份位于本机临时备份目录，产物与安装二进制一致。安装前后布局差异仅为本机应用清单变化：一个已卸载应用对应的布局项消失，一个新安装应用追加到末页。未用旧备份覆盖当前真实清单。
 - 待人工验收：新版统一确认框、取消、运行中拒绝、可丢弃样本成功移入废纸篓和容器收尾；不对用户现有软件执行破坏性验证。
 
 ## 签收

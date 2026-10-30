@@ -41,7 +41,7 @@
 
 ApplicationDiscoveryTests的四个用例与EditingRegressionTests的两个扫描/拖拽用例，经机械转换同源断言后用Swift 6编译执行通过；入口与二进制在/tmp/ilaunchpad-discovery.50a9IO。覆盖空/满/超容量页、逐个填充首个空位页、已有次序、去重、JSON保存、过期代次、拖拽提交/取消；临时目录模拟嵌套.app安装，真实FSEvents回调触发且stop后不再回调。未安装测试应用到用户真实目录，也不称标准swift test通过。
 
-Release构建及签名检查通过，已替换并启动/Applications/iLaunchPad.app；旧包及安装前布局位于/Users/wst/Library/Application Support/iLaunchPad-install-backup.oHdnWY。真实安装后界面自动补入仍待用户复验，不代表本板块整体签收。
+Release 构建及签名检查通过，已替换并启动本机 `/Applications/iLaunchPad.app`；旧包及安装前布局已保存到本机临时备份目录。真实安装后界面自动补入仍待用户复验，不代表本板块整体签收。
 
 安装前后真实layout.json差异仅为首页末尾补入已安装的腾讯会议（com.tencent.meeting）；原有应用、组及排序不变，未重置或导入布局。这证明本次启动扫描的靠前补入，不替代常驻期间新安装事件的界面验收。
 
