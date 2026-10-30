@@ -10,7 +10,7 @@
     },
     {
       "id": "ocean",
-      "design": "Ocean-blue default rocket with marine-to-cyan depth, reduced sea-glass bloom, warm coral-orange flame and a single clean upper-right rim highlight",
+      "design": "Ocean-blue default rocket with marine-to-cyan depth; restrained background glass highlights originate at the upper-left and lower-right, while the rocket uses the same broad top-down illumination as the other three themes instead of an upper-right hotspot; warm coral-orange flame",
       "source": "ocean.png"
     },
     {
