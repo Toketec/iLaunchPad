@@ -21,6 +21,7 @@ iLaunchPad 是一个 macOS GUI 进程，负责应用浏览、搜索、启动、�
 | LayoutStore / Models | 页面、组、应用的唯一内存模型与保存入口；快照、移动、导入、扫描合并、隐藏 |
 | LaunchOSImporter / ApplicationScanner | 外部 SQLite 只读投影；扫描三个应用根目录并按 Bundle ID 去重 |
 | ApplicationDirectoryMonitor / ApplicationDiscoveryPolicy | 原生FSEvents目录变化通知去抖触发后台扫描；新项追加到首个不足35格的页面，所有页满才新建页 |
+| AppIconCatalog | 消费冲刺 2 提供的包内 PNG 与稳定选择 ID，负责启动恢复；NSApplication.applicationIconImage 更新 Dock 与应用切换器，不自修改签名资源 |
 | ApplicationSearchEntry | 从应用名称、拼音、首字母、Bundle ID 生成派生搜索索引 |
 | LaunchpadDesign / WallpaperBackdropView / VisualEffectView / AppIconView | 网格几何、图标缓存、壁纸模糊和原生材质；部分 SwiftUI 图标组件与 DragSupport 委托是现存辅助实现，主网格走 NativeLaunchGrid |
 | ApplicationRemoval / ApplicationRemovalPolicy | 系统保护、可删除性与原生确认；确认后只用系统废纸篓 API 移动应用包，成功后清理布局 |
