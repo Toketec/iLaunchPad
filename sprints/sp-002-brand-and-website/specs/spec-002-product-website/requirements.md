@@ -24,7 +24,7 @@
 
 首屏必须在一次视野内依次回答“为什么需要、产品做什么、为什么值得选择”，完成产品定义、价值、获取状态和视觉证明位置；Hero 允许使用仅在首屏淡出的低透明度品牌渐变。当前版本截图与录屏尚未拍摄时，使用可访问的空白素材槽，写明素材类型、比例、拍摄动作和版本要求。任何素材槽不得包含 HTML/CSS 绘制的应用网格、虚构应用案例、旧版客户端画面或第三方媒体。
 
-GitHub 仓库已公开，主 CTA 进入真实 Release，源码 CTA 进入真实仓库；同时说明 Apple Silicon、macOS 26+、开发预览和未公证边界。SEO 标题与描述以 iLaunchPad 独立品牌为主，LaunchOS 与 LaunchNext 只在兼容布局迁移的正文/元数据事实中适度出现。
+GitHub 仓库与 v2.3.5 Release 已公开，主 CTA 进入真实 Release，源码 CTA 进入真实仓库；同时说明 Apple Silicon、macOS 26+、开发预览和未公证边界。SEO 标题与描述以 iLaunchPad 独立品牌为主，LaunchOS 与 LaunchNext 只在兼容布局迁移的正文/元数据事实中适度出现。
 
 根仓库 `.github/workflows/pages.yml` 是唯一发布入口，直接把 `apps/website/dist/` 部署到 GitHub Pages。网站内部 README 只说明本地运行、发布入口与 SSOT 链接，不复制需求。官网目录不保留嵌套 Git、`.openai` 或工具专属规则；项目级需求、架构和验收以根目录 SpecRocket 文档为准。
 
