@@ -13,6 +13,8 @@ struct DragTrackingTests {
         store.dragDestination = .page(42)
         DragTracking.updateFromDisplay(point, store: store, maximumFPS: 1)
         #expect(store.dragDestination == .page(42))
+        DragTracking.update(point, store: store)
+        #expect(store.dragDestination == .page(42))
         DragTracking.update(point, store: store, dropping: true)
         #expect(store.dragDestination == nil)
         store.dragDestination = .page(42)
@@ -487,6 +489,26 @@ struct DragTrackingTests {
         if !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion {
             #expect(item.view.layer?.animation(forKey: "gridReflow") != nil)
         }
+    }
+
+    @Test func appDragImageContainsOnlyTheIconInsteadOfTheWholeCell() throws {
+        let (store, directory) = EditingRegressionTests().fixture()
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let group = try #require(store.groups(on: 0).first { !$0.isFolder })
+        let item = LaunchpadCollectionItem()
+        item.loadView()
+        item.view.frame = CGRect(x: 0, y: 0, width: 160, height: 160)
+        item.configure(with: group, store: store, metrics: GridMetrics(width: 1120, height: 620))
+        item.view.layoutSubtreeIfNeeded()
+
+        let components = item.draggingImageComponents
+        let preview = try #require(item.appDragPreview)
+        #expect(components.count == 1)
+        #expect(components.first?.key == .icon)
+        #expect(components.first?.contents is NSImage)
+        #expect(preview.frame == components.first?.frame)
+        #expect(components.first?.frame.width ?? 0 < item.view.bounds.width)
+        #expect(components.first?.frame.height ?? 0 < item.view.bounds.height)
     }
 }
 

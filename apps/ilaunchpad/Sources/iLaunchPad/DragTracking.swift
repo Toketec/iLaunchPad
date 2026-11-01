@@ -124,12 +124,18 @@ struct NativeDragIdentity {
     }
     static func update(_ point: CGPoint, store: LayoutStore, dropping: Bool = false) {
         guard store.isPreviewingDrag else { return }
+        let now = ProcessInfo.processInfo.systemUptime
+        // A spring-open folder can receive the same native update directly and
+        // through the retained page receiver. Coalesce that synchronous pair so
+        // the glass-backed folder grid is laid out at most once for the point.
+        if !dropping, lastUpdatedStore === store, lastUpdatedSession == store.dragSessionID,
+           point == lastUpdatedPoint, now - lastUpdateTime < 1 / 240.0 { return }
         lastUpdatedStore = store
         lastUpdatedSession = store.dragSessionID
         lastUpdatedPoint = point
-        lastUpdateTime = ProcessInfo.processInfo.systemUptime
+        lastUpdateTime = now
         store.dragDestination = nil
-        let info: [String: Any] = ["point": NSValue(point: point), "time": ProcessInfo.processInfo.systemUptime, "dropping": dropping]
+        let info: [String: Any] = ["point": NSValue(point: point), "time": now, "dropping": dropping]
         NotificationCenter.default.post(name: .launchpadDragGeometry, object: store, userInfo: info)
         NotificationCenter.default.post(name: .launchpadDragMoved, object: store, userInfo: info)
     }

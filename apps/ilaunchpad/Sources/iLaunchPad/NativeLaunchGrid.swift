@@ -375,6 +375,16 @@ struct NativeLaunchGrid: NSViewRepresentable {
             forItemsAt indexPaths: Set<IndexPath>
         ) {
             guard let indexPath = indexPaths.first, groups.indices.contains(indexPath.item) else { return }
+            if let item = collectionView.item(at: indexPath) as? LaunchpadCollectionItem,
+               let preview = item.appDragPreview {
+                let iconFrame = collectionView.convert(preview.frame, from: item.view)
+                session.draggingFormation = .none
+                session.enumerateDraggingItems(options: [], for: collectionView,
+                                                classes: [NSPasteboardItem.self], searchOptions: [:]) {
+                    draggingItem, _, _ in
+                    draggingItem.setDraggingFrame(iconFrame, contents: preview.image)
+                }
+            }
             cancelMerge()
             store.beginDragPreview()
             store.dragLifetime = self
@@ -665,6 +675,24 @@ final class LaunchpadCollectionItem: NSCollectionViewItem {
 
     static func folderContains(_ point: NSPoint, frame: NSRect, radius: CGFloat) -> Bool {
         NSBezierPath(roundedRect: frame, xRadius: radius, yRadius: radius).contains(point)
+    }
+
+    override var draggingImageComponents: [NSDraggingImageComponent] {
+        // The default collection-view snapshot includes the whole transparent
+        // cell. Screen recording can expose that compositing rectangle while a
+        // folder is open, so use the native app icon as the sole drag component.
+        guard !folder, let image = iconView.image else {
+            return super.draggingImageComponents
+        }
+        let icon = NSDraggingImageComponent(key: .icon)
+        icon.contents = image
+        icon.frame = iconView.frame
+        return [icon]
+    }
+
+    var appDragPreview: (image: NSImage, frame: NSRect)? {
+        guard !folder, let image = iconView.image else { return nil }
+        return (image.copy() as? NSImage ?? image, iconView.frame)
     }
 
     override func loadView() {

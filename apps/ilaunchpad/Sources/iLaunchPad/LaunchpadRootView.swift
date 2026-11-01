@@ -20,6 +20,7 @@ struct LaunchpadRootView: View {
     @State private var selectedIndex: Int?
     @State private var folderSelection: Int?
     @State private var retainedPages: Set<Int> = []
+    @State private var folderBackgroundGroups: [Int: [LaunchGroup]] = [:]
     @State private var resourceEpoch = 0
 
     private struct ResourceRequest: Equatable {
@@ -157,6 +158,7 @@ struct LaunchpadRootView: View {
                 store.dragOpenFolderID = nil
                 folderExpanded = false
                 folderClosing = false
+                folderBackgroundGroups = [:]
                 selectedIndex = nil
                 updatePagingEligibility()
             }
@@ -230,7 +232,12 @@ struct LaunchpadRootView: View {
             ForEach(0..<store.pageCount, id: \.self) { page in
                 Group {
                 if PageRealization.shouldRealize(page, current: currentPage, retained: retainedPages) {
-                let groups = store.groups(on: page)
+                // While a folder is open, keep the page below the full-screen
+                // blur visually stable. Group-internal reorder only updates the
+                // foreground panel instead of invalidating the blurred backdrop.
+                let groups = openFolderID == nil
+                    ? store.groups(on: page)
+                    : (folderBackgroundGroups[page] ?? store.groups(on: page))
                 NativeLaunchGrid(groups: groups, store: store, allowsReordering: true,
                                  dragging: $dragging,
                                  onOpenFolder: { id in openFolder(id, metrics: metrics, origin: origin) },
@@ -333,6 +340,7 @@ struct LaunchpadRootView: View {
         folderSource = rect.insetBy(dx: rect.width * 0.09, dy: rect.height * 0.09)
         folderClosing = false
         folderSelection = nil
+        folderBackgroundGroups[currentPage] = store.groups(on: currentPage)
         openFolderID = id
         store.dragOpenFolderID = id
         store.dragRoutingPausedUntil = ProcessInfo.processInfo.systemUptime + LaunchpadMotion.folderDuration
@@ -357,6 +365,7 @@ struct LaunchpadRootView: View {
         guard openFolderID == id, folderClosing, !folderExpanded else { return }
         openFolderID = nil
         folderClosing = false
+        folderBackgroundGroups = [:]
         store.dragRoutingPausedUntil = 0
         focusRequest += 1
     }
