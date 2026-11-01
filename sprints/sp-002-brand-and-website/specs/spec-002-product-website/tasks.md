@@ -12,13 +12,13 @@
 | T08 | 备份原布局，以初始化首页生成当前客户端真实截图与录屏并接入素材槽 | requirements | ✅ |
 | T09 | 使用系统原生录屏重制分页、搜索、拖拽、文件夹与编辑模式产品演示，并为各功能加入定位缩放与镜头过渡 | requirements | ✅ |
 | T10 | 清理嵌套仓库与工具专属托管残留，使用主仓库 GitHub Pages 工作流发布 | requirements | ✅ |
-| T11 | 压缩 Hero 并以当代 14 英寸 MacBook Pro 原创外框呈现 | requirements | ✅ |
+| T11 | 压缩 Hero 并以最新款 MacBook Pro 灵动岛正面原创外框呈现 | requirements | ✅ |
 
 ## 当前事实
 
 - 官网已移除模拟启动台、虚构案例和图标选择展示；首屏为左文案、右无字幕产品导览，页面按外观、交互、六项核心亮点与八项完整功能单向展开。
 - Hero 串联分页、搜索、拖拽换位、文件夹开合与长按编辑；交互短片聚焦拖拽、文件夹和编辑模式。两支视频均只使用真实 macOS 系统录屏，带缓入缓出的定位缩放和柔和转场，不叠加文字或假操作；文件夹段已替换为用户重新录制的开合素材。
-- v2.3.5 ZIP 实测为 5.1 MB，官网支持中英双语；主入口指向 v2.3.5 Release 与源码仓库。GitHub Pages 由根仓库工作流发布至 `https://toketec.github.io/iLaunchPad/`。
+- v2.3.6 ZIP 实测为 4.6 MB，官网支持中英双语；主入口指向 v2.3.6 Release 与源码仓库。GitHub Pages 由根仓库工作流发布至 `https://toketec.github.io/iLaunchPad/`。
 - 兼容迁移正文准确列出旧版 macOS LaunchPad、LaunchOS 与 LaunchNext；Hero MP4 从 13,279,549 字节压至 8,066,752 字节，并置于原创 CSS MacBook Pro 外框内。
 - 采集前的原布局已备份；当前初始化首页保留“其他”文件夹和一个空位，按用户要求暂不恢复。
 

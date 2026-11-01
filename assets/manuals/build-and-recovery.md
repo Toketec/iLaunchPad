@@ -8,7 +8,7 @@
 ./apps/ilaunchpad/Scripts/build-app.sh
 ```
 
-产物为 apps/ilaunchpad/dist/iLaunchPad.app。脚本需要 macOS 的 Swift/SDK、sips、iconutil 和 codesign，生成 arm64 及 ad-hoc 签名。脚本会重建工程 dist 内同名应用包。工程源码、资源与脚本归在同一目录，独立工具域暂为空。
+产物为 apps/ilaunchpad/dist/iLaunchPad.app。脚本需要 macOS 的 Swift/SDK、Xcode `actool` 和 `codesign`，使用 Icon Composer 资源生成 macOS 26/27 原生包图标，输出 arm64 及 ad-hoc 签名应用。脚本会重建工程 dist 内同名应用包。工程源码、资源与脚本归在同一目录，独立工具域暂为空。
 
 测试命令为：
 

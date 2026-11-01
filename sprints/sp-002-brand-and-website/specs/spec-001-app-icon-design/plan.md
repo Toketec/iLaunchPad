@@ -6,9 +6,10 @@
 - [ ] `apps/ilaunchpad/Resources/AppIconSources/*.png`、`prompts.json` — 四款原稿与来源说明
 - [ ] `apps/ilaunchpad/Resources/AppIcons/*.png` — 四款连续圆角发布图
 - [ ] `apps/ilaunchpad/Resources/AppIcon-preview.png` — README/文档预览
+- [ ] `apps/ilaunchpad/Resources/AppIcon.icon/` — macOS 26/27 默认包图标的 Icon Composer 资源
 - [ ] `apps/ilaunchpad/Tools/prepare_app_icons.swift` — 统一发布封装
 - [ ] `apps/ilaunchpad/Sources/iLaunchPad/AppIconCatalog.swift` — 稳定目录契约
-- [ ] `apps/ilaunchpad/Scripts/build-app.sh` — 打包图标目录并生成初始 icns
+- [ ] `apps/ilaunchpad/Scripts/build-app.sh` — 打包 512px 运行时图标并编译 Icon Composer 默认图标
 
 ## 实现顺序
 

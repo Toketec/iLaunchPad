@@ -132,13 +132,13 @@ html[lang="en"] .showcase-heading h2, html[lang="en"] .section-title h2, html[la
 .media-ready { margin: 0; background: #08090b; }
 .media-ready::before, .media-ready::after { display: none; }
 .media-visual { display: block; width: 100%; height: 100%; object-fit: cover; }
-.macbook-pro { position: relative; width: calc(100% + clamp(28px, 3.2vw, 58px)); margin: 0; justify-self: start; padding: 0 2.2% 4.8%; animation: rise .8s .08s cubic-bezier(.22, .7, .25, 1) both; filter: drop-shadow(0 32px 34px rgba(0, 0, 0, .22)); }
-.macbook-screen { position: relative; overflow: hidden; aspect-ratio: 1920 / 1248; border: clamp(8px, .9vw, 13px) solid #17181b; border-bottom-width: clamp(12px, 1.25vw, 18px); border-radius: clamp(18px, 2vw, 28px); background: #050506; box-shadow: inset 0 0 0 1px rgba(255,255,255,.14), inset 0 -1px rgba(255,255,255,.08); }
+.macbook-pro { position: relative; width: calc(100% + clamp(20px, 2.5vw, 44px)); margin: 0; justify-self: start; padding: 0 1.3% 2.8%; animation: rise .8s .08s cubic-bezier(.22, .7, .25, 1) both; filter: drop-shadow(0 24px 30px rgba(0, 0, 0, .17)); }
+.macbook-screen { position: relative; overflow: hidden; box-sizing: border-box; aspect-ratio: 1920 / 1248; border: clamp(6px, .62vw, 9px) solid #070809; outline: 1px solid rgba(92, 94, 98, .88); border-radius: clamp(14px, 1.45vw, 21px); background: #020203; box-shadow: 0 0 0 1px rgba(255,255,255,.2), inset 0 1px rgba(255,255,255,.05); }
 .macbook-screen .media-visual { object-fit: cover; }
-.macbook-notch { position: absolute; left: 50%; top: -1px; z-index: 2; width: 13%; height: 4.1%; transform: translateX(-50%); border-radius: 0 0 10px 10px; background: #17181b; box-shadow: 0 1px rgba(255,255,255,.04); }
-.macbook-base { position: absolute; left: 0; right: 0; bottom: 0; height: 6.5%; border-radius: 4px 4px 40% 40% / 8px 8px 55% 55%; background: linear-gradient(180deg, #aeb1b6 0%, #777b81 28%, #3f4247 73%, #242629 100%); box-shadow: inset 0 1px rgba(255,255,255,.75), 0 12px 18px rgba(0,0,0,.19); }
-.macbook-base::after { content: ""; position: absolute; left: 1.8%; right: 1.8%; bottom: -7%; height: 20%; border-radius: 0 0 50% 50%; background: #202225; opacity: .82; }
-.macbook-base span { position: absolute; left: 42%; right: 42%; top: 0; height: 34%; border-radius: 0 0 14px 14px; background: linear-gradient(180deg, rgba(40,42,46,.6), rgba(220,222,225,.34)); }
+.macbook-island { position: absolute; left: 50%; top: 1.15%; z-index: 2; width: 5.6%; height: 3.15%; transform: translateX(-50%); border-radius: 999px; background: #030304; box-shadow: inset 0 0 0 1px rgba(255,255,255,.035), 0 1px 2px rgba(0,0,0,.26); }
+.macbook-base { position: absolute; left: 0; right: 0; bottom: .35%; height: 3%; border-radius: 2px 2px 18px 18px / 2px 2px 7px 7px; background: linear-gradient(180deg, #77797d 0%, #3d3f43 34%, #202124 70%, #121315 100%); box-shadow: inset 0 1px rgba(255,255,255,.55), 0 7px 12px rgba(0,0,0,.14); }
+.macbook-base::after { content: ""; position: absolute; left: 2.4%; right: 2.4%; bottom: -1px; height: 2px; border-radius: 0 0 50% 50%; background: rgba(9,10,11,.82); }
+.macbook-base span { position: absolute; left: 43%; right: 43%; top: 0; height: 38%; border-radius: 0 0 10px 10px; background: linear-gradient(180deg, rgba(12,13,14,.62), rgba(128,130,134,.2)); }
 .media-slot-top { min-height: 58px; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; border-bottom: 1px solid var(--line); color: var(--tertiary); font-size: var(--font-meta); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
 .media-state { display: inline-flex; align-items: center; gap: 9px; }
 .media-state i { width: 7px; height: 7px; border-radius: 50%; background: var(--text); box-shadow: 0 0 0 5px color-mix(in srgb, var(--text) 9%, transparent); }
@@ -239,8 +239,8 @@ html[lang="en"] .showcase-heading h2, html[lang="en"] .section-title h2, html[la
   .hero-actions { align-items: stretch; flex-direction: column; }
   .hero-actions .button { width: 100%; }
   .media-slot-hero, .media-slot-wide { aspect-ratio: 4 / 3; border-radius: 29px; }
-  .macbook-pro { padding-inline: 1.5%; padding-bottom: 5.4%; }
-  .macbook-screen { border-width: 7px; border-bottom-width: 10px; border-radius: 18px; }
+  .macbook-pro { padding-inline: 1%; padding-bottom: 3.2%; }
+  .macbook-screen { border-width: 5px; border-radius: 14px; }
   .media-slot-top { min-height: 48px; padding-inline: 16px; }
   .media-slot-body { left: 8%; right: 8%; bottom: 8%; }
   .media-slot-body h2, .media-slot-body h3 { font-size: 24px; }

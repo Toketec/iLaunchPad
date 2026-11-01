@@ -42,13 +42,15 @@ enum AppIconCatalog {
         guard bundlePath.hasSuffix(".app") else { return }
         let workspace = NSWorkspace.shared
         if styleID == defaultID {
-            // The signed bundle already ships with the ocean icon. Removing a
-            // previous custom file icon restores that default after quitting.
+            // The signed bundle ships the ocean artwork as an Icon Composer
+            // resource. Removing a previous custom file icon returns to that
+            // native representation after the process exits.
             _ = workspace.setIcon(nil, forFile: bundlePath, options: [])
         } else {
             // NSWorkspace stores a Finder custom icon as file metadata. This
             // survives process exit without rewriting signed bundle resources.
             _ = workspace.setIcon(image, forFile: bundlePath, options: [])
         }
+        workspace.noteFileSystemChanged(bundlePath)
     }
 }
