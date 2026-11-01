@@ -9,7 +9,7 @@
 - 冲刺 1 在历史里程碑使用用户确认的白底石墨火箭作为初始包图标，spec-007 只负责图标选择的运行时偏好；当前四款玻璃主题、玻璃蓝默认包图标与发布封装归冲刺 2 spec-001。
 - 细功能唯一入口为 `docs/functional-overview.md`（相对冲刺根），规则见同级 `SPRINT-features.md`；实现程度及证据只写所属 spec 的 tasks/check。文档整理不触发构建或自动安装。
 - 布局导入目标同时包括 LaunchOS 和 macOS 26 以前系统 Launchpad 的遗留数据/备份；当前仅有 LaunchOS 实现。旧系统接受定义必须经样本核对后形成，不得猜表名或把文档目标声称为已有能力。
-- 包基线为 2.3.2/build 12。用户已确认进组松手问题解决，具体范围与其他未验项见 spec-005/check；不得将已撤回的 2.3.3、构建成功或局部确认当成全功能验收。
+- 包基线为 2.3.4/build 13。用户已确认进组松手问题解决，具体范围与其他未验项见 spec-005/check；不得将已撤回的 2.3.3、构建成功或局部确认当成全功能验收。
 - 用户布局位于 `~/Library/Application Support/iLaunchPad/layout.json`，LaunchOS 数据库只读；结构迁移不操作用户数据或已安装应用。
 - 产品官网位于 `apps/website/`，静态发布目录为 `apps/website/dist/`，产品与实现边界归冲刺 2 spec-002；GitHub Pages 只通过根仓库 `.github/workflows/pages.yml` 发布。官网目录禁止嵌套 `.git`、`.openai` 或工具专属规则，所有 AI 协作约束统一由本文件与 `CLAUDE.md` 入口承接并遵循 SpecRocket。
 
