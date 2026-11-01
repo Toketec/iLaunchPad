@@ -11,6 +11,7 @@
 - 布局导入目标同时包括 LaunchOS 和 macOS 26 以前系统 Launchpad 的遗留数据/备份；当前仅有 LaunchOS 实现。旧系统接受定义必须经样本核对后形成，不得猜表名或把文档目标声称为已有能力。
 - 包基线为 2.3.2/build 12。用户已确认进组松手问题解决，具体范围与其他未验项见 spec-005/check；不得将已撤回的 2.3.3、构建成功或局部确认当成全功能验收。
 - 用户布局位于 `~/Library/Application Support/iLaunchPad/layout.json`，LaunchOS 数据库只读；结构迁移不操作用户数据或已安装应用。
+- 产品官网位于 `apps/website/`，静态发布目录为 `apps/website/dist/`，产品与实现边界归冲刺 2 spec-002；GitHub Pages 只通过根仓库 `.github/workflows/pages.yml` 发布。官网目录禁止嵌套 `.git`、`.openai` 或工具专属规则，所有 AI 协作约束统一由本文件与 `CLAUDE.md` 入口承接并遵循 SpecRocket。
 
 > **AI 协作入口** — 本文档定义了完整的 SSOT 规格驱动开发流程，AI 在协作时必须遵守。
 

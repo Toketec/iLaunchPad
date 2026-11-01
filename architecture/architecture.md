@@ -2,7 +2,7 @@
 
 ## 系统责任与边界
 
-iLaunchPad 是一个 macOS GUI 进程，负责应用浏览、搜索、启动、布局整理、文件夹和安全移除应用包。客户端工程在 apps/ilaunchpad/；Sources/iLaunchPad 下所有模块一起编译、发布。无后端、远程 API、消息队列或独立 worker。LaunchOS 仅作为可选的外部只读布局来源；macOS 提供应用发现、启动、图标、壁纸和桌面交互。
+iLaunchPad 有两个独立交付单元：`apps/ilaunchpad/` 是 macOS GUI 客户端，负责应用浏览、搜索、启动、布局整理、文件夹和安全移除应用包；`apps/website/` 是静态产品官网，负责原创介绍、真实客户端媒体展示与发行引导。两者无运行时通信。无后端、远程 API、消息队列或独立 worker。LaunchOS 仅作为客户端可选的外部只读布局来源；macOS 提供应用发现、启动、图标、壁纸和桌面交互。
 
 业务链路为：用户输入 → 原生窗口/SwiftUI 状态 → AppKit 集合与拖拽编排 → LayoutStore 内存布局 → 本地 JSON。启动应用、卸载、壁纸读取经系统 API 跨出客户端边界。
 
@@ -28,6 +28,7 @@ iLaunchPad 是一个 macOS GUI 进程，负责应用浏览、搜索、启动、�
 | LaunchpadSettingsView / LoginItemController | 外观偏好走AppStorage；登录项以SMAppService.mainApp为事实源，用户切换才注册/注销 |
 | VisualResourceCache | 串行actor处理图标/壁纸解码与PNG缓存；只向UI交付不可变CGImage，不拥有布局 |
 
+官网模块位于 `apps/website/dist/`，由语义 HTML、CSS、少量渐进增强 JavaScript 和项目自有静态资源组成；根仓库 GitHub Pages 工作流直接发布该目录。页面使用当前客户端真实截图与系统录屏，不在网页内模拟客户端。官网不读取客户端布局、应用目录或偏好，不提供账户、API 或远程控制。
 
 ## 核心链路
 
@@ -85,4 +86,6 @@ FileManager.trashItem成功才删除布局并执行容器收尾；取消、资�
 | 自有 JSON | Models.swift Codable 与 LayoutStore 编解码 | 私有存储，无外部消费者；演进约束见 data-model.md |
 | macOS API 与 Bundle | Apple SDK、应用 Info.plist | AppKit/SwiftUI/Carbon/CoreImage/SQLite3；最低 26.0，实际打包 arm64 |
 | 自有网络/服务契约 | 不适用 | 无网络服务、外部 SDK 或消息生产者 |
+| 产品官网 | `apps/website/` 静态文件、`.github/workflows/pages.yml` 与冲刺 2 spec-002 | GitHub Pages 独立部署，不读取客户端数据；本地、线上和验收状态分别记录 |
 
+没有生成客户端、Mock 服务或外部契约工具。官网是已存在交付单元的目录归位与事实补录，不改变客户端数据、安全或一致性模型，故不新增 ADR。启动台实现差距见[冲刺 1](../sprints/sp-001-native-launchpad/docs/functional-overview.md)，品牌与官网见[冲刺 2](../sprints/sp-002-brand-and-website/docs/functional-overview.md)。

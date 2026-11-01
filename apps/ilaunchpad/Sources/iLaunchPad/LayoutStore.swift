@@ -160,13 +160,79 @@ final class LayoutStore: ObservableObject {
         }
     }
 
-    static let shared = LayoutStore()
+    static let shared: LayoutStore = {
+        guard CommandLine.arguments.contains("--website-capture") else { return LayoutStore() }
+        let storageURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("iLaunchPad-website-capture-layout.json")
+        return LayoutStore(layout: websiteCaptureLayout(), storageURL: storageURL)
+    }()
+
+    private static func websiteCaptureLayout() -> LaunchLayout {
+        func app(_ path: String) -> LaunchApp? {
+            let url = URL(fileURLWithPath: path)
+            guard let bundle = Bundle(url: url), let bundleIdentifier = bundle.bundleIdentifier else { return nil }
+            let name = (bundle.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String)
+                ?? (bundle.object(forInfoDictionaryKey: "CFBundleName") as? String)
+                ?? url.deletingPathExtension().lastPathComponent
+            return LaunchApp(id: "capture-\(bundleIdentifier)", name: name,
+                             bundleIdentifier: bundleIdentifier, path: path)
+        }
+        func single(_ path: String) -> LaunchGroup? {
+            guard let app = app(path) else { return nil }
+            return LaunchGroup(id: "capture-group-\(app.bundleIdentifier)", name: "", isFolder: false, apps: [app])
+        }
+
+        let firstPagePaths = [
+            "/Applications/Safari.app",
+            "/System/Applications/Photos.app",
+            "/System/Applications/Messages.app",
+            "/System/Applications/Notes.app",
+            "/System/Applications/Calendar.app",
+            "/System/Applications/Maps.app",
+            "/System/Applications/Music.app",
+            "/System/Applications/Books.app",
+            "/System/Applications/App Store.app",
+            "/System/Applications/System Settings.app",
+            "/System/Applications/Freeform.app"
+        ]
+        let utilityPaths = [
+            "/System/Applications/Calculator.app",
+            "/System/Applications/Clock.app",
+            "/System/Applications/VoiceMemos.app",
+            "/System/Applications/Shortcuts.app",
+            "/System/Applications/Utilities/Activity Monitor.app",
+            "/System/Applications/Utilities/Disk Utility.app"
+        ]
+        var firstPage = firstPagePaths.compactMap(single)
+        let utilities = utilityPaths.compactMap(app)
+        if !utilities.isEmpty {
+            firstPage.append(LaunchGroup(id: "capture-folder-utilities", name: "实用工具",
+                                         isFolder: true, apps: utilities))
+        }
+        let secondPagePaths = [
+            "/System/Applications/Podcasts.app",
+            "/System/Applications/TV.app",
+            "/System/Applications/Weather.app",
+            "/System/Applications/Mail.app",
+            "/System/Applications/Contacts.app",
+            "/System/Applications/Reminders.app",
+            "/System/Applications/Home.app",
+            "/System/Applications/Passwords.app",
+            "/System/Applications/Preview.app"
+        ]
+        return LaunchLayout(importedFrom: "website-capture", pages: [
+            LaunchPage(id: "capture-page-1", groups: firstPage),
+            LaunchPage(id: "capture-page-2", groups: secondPagePaths.compactMap(single))
+        ])
+    }
 
     private let fileManager = FileManager.default
     private let supportURL: URL
     private let layoutURL: URL
+    private let scansApplications: Bool
 
     private init() {
+        scansApplications = true
         supportURL = FileManager.default.homeDirectoryForCurrentUser
             .appendingPathComponent("Library/Application Support/iLaunchPad", isDirectory: true)
         layoutURL = supportURL.appendingPathComponent("layout.json")
@@ -190,6 +256,7 @@ final class LayoutStore: ObservableObject {
 
     // Isolated storage for interaction regression tests; never scans real apps.
     init(layout: LaunchLayout, storageURL: URL) {
+        scansApplications = false
         self.layout = layout
         layoutURL = storageURL
         supportURL = storageURL.deletingLastPathComponent()
@@ -391,6 +458,7 @@ final class LayoutStore: ObservableObject {
     }
 
     func refreshInstalledApplications() {
+        guard scansApplications else { return }
         scanInProgress = true
         lastScanStarted = Date()
         scanTask?.cancel()
@@ -437,6 +505,7 @@ final class LayoutStore: ObservableObject {
     func waitForApplicationScan() async { await scanTask?.value }
 
     func refreshApplicationsOnPresentation() {
+        guard scansApplications else { return }
         guard !scanInProgress, Date().timeIntervalSince(lastScanStarted) >= 20 else { return }
         refreshInstalledApplications()
     }

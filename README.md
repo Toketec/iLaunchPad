@@ -19,7 +19,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Toketec/iLaunchPad/releases/latest"><strong>下载最新版本</strong></a>
+  <a href="https://toketec.github.io/iLaunchPad/"><strong>官方网站</strong></a>
+  · <a href="https://github.com/Toketec/iLaunchPad/releases/latest"><strong>下载最新版本</strong></a>
   · <a href="#从源码构建">从源码构建</a>
   · <a href="#功能与进度">开发进度</a>
   · <a href="#参与贡献">参与贡献</a>
@@ -146,6 +147,7 @@ swift test --package-path apps/ilaunchpad
 
 ## 项目地图
 
+- [产品官网](https://toketec.github.io/iLaunchPad/) · [官网规格](sprints/sp-002-brand-and-website/specs/spec-002-product-website/requirements.md)
 - [产品概览](docs/product-overview.md) · [非功能约束](docs/non-functional-reqs.md) · [视觉语言](docs/visual-design.md)
 - [冲刺 1：启动台功能](sprints/sp-001-native-launchpad/docs/functional-overview.md) · [业务规则](sprints/sp-001-native-launchpad/docs/SPRINT-features.md)
 - [用户场景](sprints/sp-001-native-launchpad/docs/user-scenarios.md) · [业务流程](sprints/sp-001-native-launchpad/docs/business-flows.md) · [界面结构](sprints/sp-001-native-launchpad/docs/prototypes/prototypes.md)

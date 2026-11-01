@@ -2,7 +2,7 @@
 
 ## 运行单元与依赖
 
-一个 iLaunchPad.app GUI 进程，应用标识 local.ilaunchpad.app，当前包版本 2.3.2/build 12。窗口、布局、输入监听和 UI 共享故障域。没有监听端口、后台服务、数据库服务、远程 API、队列、容器或集群部署。
+本地运行单元是一个 iLaunchPad.app GUI 进程，应用标识 local.ilaunchpad.app，当前包版本 2.3.2/build 12。窗口、布局、输入监听和 UI 共享故障域。另有一个独立静态产品官网，不与客户端通信。没有监听端口、后台服务、数据库服务、远程 API、队列、容器或集群部署。
 
 运行需要 macOS 26.0 及系统 AppKit、SwiftUI、Carbon、CoreImage、SQLite3。应用读取当前用户目录、系统应用目录和桌面壁纸；LaunchOS SQLite 仅在兼容导入时可选读取，来源应用无需运行。无运行密钥、账号令牌或网络依赖。
 
@@ -12,6 +12,7 @@ SwiftPM 工程在 apps/ilaunchpad/，swift-tools-version 6.0，链接 AppKit/Car
 
 从项目根执行 apps/ilaunchpad/Scripts/build-app.sh。脚本根据自身位置寻找工程，将 release 二进制、Info.plist、生成的 icns 组装到 apps/ilaunchpad/dist/iLaunchPad.app，并 ad-hoc 签名。重复构建会替换该工程 dist 内的应用包。该脚本不安装到 /Applications，不修改用户布局；没有 CI、开发者证书公证、自动更新或发布服务器。具体操作见 [手册](../assets/manuals/build-and-recovery.md)。
 
+官网源码在 `apps/website/`，静态发布目录为 `dist/`。根仓库 `.github/workflows/pages.yml` 在 `main` 更新时上传该目录并部署到 GitHub Pages；官网无独立构建依赖、嵌套 Git 或工具专属托管清单。官网与客户端独立构建、版本和部署，真实客户端截图与系统录屏随静态资源发布。线上部署成功不等于客户端或网站已经完成人工验收。官网规格见[冲刺 2 spec-002](../sprints/sp-002-brand-and-website/specs/spec-002-product-website/requirements.md)。
 
 ## 启动、输入与同步异步路径
 

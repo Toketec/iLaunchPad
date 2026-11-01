@@ -2,6 +2,8 @@
 **/.build/
 **/.swiftpm/
 **/dist/
+!apps/website/dist/
+!apps/website/dist/**
 .DS_Store
 *.local
 .env
