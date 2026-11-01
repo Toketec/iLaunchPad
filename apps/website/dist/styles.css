@@ -94,7 +94,7 @@ html[lang="en"] .hero h1 { line-height: 1.1; letter-spacing: .006em; font-weight
 html[lang="en"] .hero-claim { line-height: 1.58; letter-spacing: .012em; font-weight: 500; }
 html[lang="en"] .hero-lead, html[lang="en"] .showcase-heading p:last-child, html[lang="en"] .highlight-card p, html[lang="en"] .faq-list details p, html[lang="en"] .final-cta > p:not(.section-kicker) { line-height: 1.78; letter-spacing: .014em; }
 html[lang="en"] .button, html[lang="en"] .highlight-card h3, html[lang="en"] .capability-grid h3, html[lang="en"] .faq-list summary { font-weight: 520; letter-spacing: .012em; }
-html[lang="en"] .statement h2, html[lang="en"] .showcase-heading h2, html[lang="en"] .section-title h2, html[lang="en"] .migration-card h2, html[lang="en"] .final-cta h2 { line-height: 1.16; letter-spacing: .002em; font-weight: 540; }
+html[lang="en"] .showcase-heading h2, html[lang="en"] .section-title h2, html[lang="en"] .migration-card h2, html[lang="en"] .final-cta h2 { line-height: 1.16; letter-spacing: .002em; font-weight: 540; }
 .section-shell { width: min(1160px, calc(100% - 64px)); margin-inline: auto; }
 .skip-link { position: fixed; left: 18px; top: -80px; z-index: 100; padding: 12px 18px; border-radius: 16px; background: var(--glass-fill-strong); box-shadow: var(--glass-shadow); backdrop-filter: blur(28px) saturate(160%); transition: top .2s ease; }
 .skip-link:focus { top: 16px; }
@@ -140,13 +140,12 @@ html[lang="en"] .statement h2, html[lang="en"] .showcase-heading h2, html[lang="
 .media-slot-body h2, .media-slot-body h3 { margin-bottom: 10px; color: var(--text); font-size: clamp(30px, 3.5vw, 48px); line-height: 1.08; letter-spacing: -.045em; }
 .media-slot-body p { margin: 0; color: var(--secondary); font-size: var(--font-small); }
 
-.statement { padding-block: 12px 44px; text-align: center; }
 .section-kicker { margin-bottom: 20px; color: var(--tertiary); font-size: var(--font-meta); font-weight: 540; letter-spacing: .12em; text-transform: uppercase; }
 .section-kicker.brand-kicker { text-transform: none; }
-.statement h2, .showcase-heading h2, .section-title h2, .migration-card h2, .final-cta h2 { margin: 0; font-size: var(--font-section); line-height: 1.1; letter-spacing: -.045em; font-weight: 620; }
+.showcase-heading h2, .section-title h2, .migration-card h2, .final-cta h2 { margin: 0; font-size: var(--font-section); line-height: 1.1; letter-spacing: -.045em; font-weight: 620; }
 
 .showcase { padding-block: 145px; }
-.showcase-dark { padding-top: 86px; color: var(--text); background: transparent; }
+.showcase-dark { padding-top: 36px; color: var(--text); background: transparent; }
 .showcase-heading { max-width: 880px; margin: 0 auto 60px; text-align: center; }
 .showcase-heading p:last-child { max-width: 680px; margin: 26px auto 0; color: var(--secondary); font-size: var(--font-body); line-height: 1.7; }
 .media-slot-dark { color: var(--text); background: var(--glass-fill-strong); }
@@ -236,8 +235,7 @@ html[lang="en"] .statement h2, html[lang="en"] .showcase-heading h2, html[lang="
   .media-slot-body { left: 8%; right: 8%; bottom: 8%; }
   .media-slot-body h2, .media-slot-body h3 { font-size: 24px; }
   .media-slot-body p { font-size: var(--font-meta); }
-  .statement { padding-block: 8px 34px; }
-  .showcase-dark { padding-top: 66px; }
+  .showcase-dark { padding-top: 28px; }
   .showcase { padding-block: 92px; }
   .showcase-heading { margin-bottom: 40px; }
   .showcase-heading p:last-child { font-size: var(--font-body); }
