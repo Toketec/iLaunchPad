@@ -2,7 +2,7 @@
 
 ## 系统责任与边界
 
-iLaunchPad 有两个独立交付单元：`apps/ilaunchpad/` 是 macOS GUI 客户端，负责应用浏览、搜索、启动、布局整理、文件夹和安全移除应用包；`apps/website/` 是静态产品官网，负责原创介绍、真实客户端媒体展示与发行引导。两者无运行时通信。无后端、远程 API、消息队列或独立 worker。LaunchOS 仅作为客户端可选的外部只读布局来源；macOS 提供应用发现、启动、图标、壁纸和桌面交互。
+iLaunchPad 有两个独立交付单元：`apps/ilaunchpad/` 是 macOS GUI 客户端，负责应用浏览、搜索、启动、布局整理、文件夹和安全移除应用包；`apps/website/` 是静态产品官网，负责原创介绍、真实客户端媒体展示与发行引导。两者无运行时通信。无后端、远程 API、消息队列或独立 worker。旧版 macOS LaunchPad、LaunchOS 与 LaunchNext 仅作为客户端可选的外部只读布局来源；macOS 提供应用发现、启动、图标、壁纸和桌面交互。
 
 业务链路为：用户输入 → 原生窗口/SwiftUI 状态 → AppKit 集合与拖拽编排 → LayoutStore 内存布局 → 本地 JSON。启动应用、卸载、壁纸读取经系统 API 跨出客户端边界。
 
@@ -19,9 +19,9 @@ iLaunchPad 有两个独立交付单元：`apps/ilaunchpad/` 是 macOS GUI 客户
 | FolderOverlay / FolderMorphSurface | 组内网格、名称编辑、原生玻璃面板和连续展开变换 |
 | DragTracking / FolderDragBoundary | 先路由容器边界，再计算格子位置；离开文件夹判断、停留和最终 drop |
 | LayoutStore / Models | 页面、组、应用的唯一内存模型与保存入口；快照、移动、导入、扫描合并、隐藏 |
-| LaunchOSImporter / ApplicationScanner | 外部 SQLite 只读投影；扫描三个应用根目录并按 Bundle ID 去重 |
+| LaunchOSImporter / LegacyLaunchpadImporter / LaunchNextImporter / ApplicationScanner | 三类外部布局只读投影；扫描三个应用根目录并按 Bundle ID 去重 |
 | ApplicationDirectoryMonitor / ApplicationDiscoveryPolicy | 原生FSEvents目录变化通知去抖触发后台扫描；新项追加到首个不足35格的页面，所有页满才新建页 |
-| AppIconCatalog | 消费冲刺 2 提供的包内 PNG 与稳定选择 ID，负责启动恢复；NSApplication.applicationIconImage 更新 Dock 与应用切换器，不自修改签名资源 |
+| AppIconCatalog | 消费冲刺 2 提供的包内 PNG 与稳定选择 ID；NSApplication 更新进程图标，NSWorkspace 文件图标元数据保证退出后仍保持选择，不改签名资源 |
 | ApplicationSearchEntry | 从应用名称、拼音、首字母、Bundle ID 生成派生搜索索引 |
 | LaunchpadDesign / WallpaperBackdropView / VisualEffectView / AppIconView | 网格几何、图标缓存、壁纸模糊和原生材质；部分 SwiftUI 图标组件与 DragSupport 委托是现存辅助实现，主网格走 NativeLaunchGrid |
 | ApplicationRemoval / ApplicationRemovalPolicy | 系统保护、可删除性与原生确认；确认后只用系统废纸篓 API 移动应用包，成功后清理布局 |
@@ -83,6 +83,8 @@ FileManager.trashItem成功才删除布局并执行容器收尾；取消、资�
 | 边界 | 当前定义与所有者 | 兼容及责任 |
 |:---|:---|:---|
 | LaunchOS SQLite 文件 | [导入接受定义](../assets/interfaces/launchos-layout-import.md)；第三方拥有源 schema | 客户端只支持 SQL 所列投影；由 spec-001 记录，不保证任意版本 |
+| 旧版 macOS LaunchPad SQLite | [导入接受定义](../assets/interfaces/legacy-launchpad-layout-import.md)；系统拥有源 schema | 只读支持升级遗留的 apps/groups/items 投影，不修改 Dock 数据 |
+| LaunchNext JSON | [导入接受定义](../assets/interfaces/launchnext-layout-import.md)；第三方拥有格式 | 只读支持官方导出的两种 JSON 投影，不读取其 SwiftData 存储 |
 | 自有 JSON | Models.swift Codable 与 LayoutStore 编解码 | 私有存储，无外部消费者；演进约束见 data-model.md |
 | macOS API 与 Bundle | Apple SDK、应用 Info.plist | AppKit/SwiftUI/Carbon/CoreImage/SQLite3；最低 26.0，实际打包 arm64 |
 | 自有网络/服务契约 | 不适用 | 无网络服务、外部 SDK 或消息生产者 |

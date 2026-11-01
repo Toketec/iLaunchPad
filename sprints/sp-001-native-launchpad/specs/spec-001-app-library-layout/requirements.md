@@ -1,17 +1,17 @@
-# spec-001：应用目录、布局保存与双来源导入
+# spec-001：应用目录、布局保存与多来源导入
 
 ## 产品依据与架构落地边界
 
 - 细功能：DATA-01～14，逐项定义见 [功能清单](../../docs/functional-overview.md)；业务规则见 [SPRINT-features](../../docs/SPRINT-features.md)。
 - 架构基线：[模块职责](../../../../architecture/architecture.md)、[数据模型](../../../../architecture/data-model.md)、[运行与偏好](../../../../architecture/runtime.md)。
-- 进入状态：已有本机应用扫描、JSON 读取保存、LaunchOS 固定路径只读导入。没有旧系统 Launchpad 解析器、来源选择或覆盖前自动备份。文档补齐不新增数据库兼容能力。
+- 进入状态：已有本机应用扫描、JSON 读取保存和 LaunchOS 固定路径只读导入。本次增加旧版系统遗留数据库与 LaunchNext JSON 的明确入口；覆盖前自动备份与完整结果摘要仍未实现。
 - 实现边界：存量与新增切片在同一功能板块维护；执行、差距与验收证据见tasks/check，不由接口存在推断全部能力完成。
-- 退出目标：能够稳定发现应用、保留/恢复布局，明确选择 LaunchOS 或 macOS 26 以前系统 Launchpad 来源；校验后安全替换，失败不损坏原布局。两个来源各自有经样本验证的接受定义和测试。
+- 退出目标：能够稳定发现应用、保留/恢复布局，明确选择 LaunchOS、LaunchNext JSON 或 macOS 26 以前系统 Launchpad 来源；校验后安全替换，失败不损坏原布局。三类来源各自有接受定义，新增两类具有隔离样本检查。
 
 ## Context Contract
 
 - 无上游功能规格；采用 architecture 三文件中的单进程、MainActor、LaunchLayout 基线。
-- Models.swift 是自身 JSON 类型权威；LaunchOS 接受定义只描述 LaunchOS，不可复用于旧系统库。
+- Models.swift 是自身 JSON 类型权威；三类外部来源分别使用独立接受定义，不互相复用字段关系。
 
 ## 局部设计与复原约束
 
@@ -23,22 +23,20 @@ LayoutStore.groups(on:)、allApps()、group(id:) 是消费者入口；resolvedUR
 
 ### 自有布局与保存
 
-Models.swift 的 LaunchLayout/LaunchPage/LaunchGroup/LaunchApp 是可执行序列化事实。自身有效 JSON 优先；当前失败后尝试 LaunchOS，再建立空页、normalize、扫描和保存。此链路会覆盖不可解码的旧文件，不满足 DATA-14 的保留要求，补实现前要明确坏文件隔离和来源选择策略。
+Models.swift 的 LaunchLayout/LaunchPage/LaunchGroup/LaunchApp 是可执行序列化事实。自身有效 JSON 优先；当前失败后仍只自动尝试 LaunchOS，再建立空页、normalize、扫描和保存。旧版系统与 LaunchNext 为用户主动选择，避免多来源静默覆盖。此链路会覆盖不可解码的旧文件，不满足 DATA-14 的保留要求。
 
 save 使用 JSON 编码和原子替换；预览期间禁止保存，快照/拖拽事务的具体实现归 spec-005。导入成功、命名、隐藏、移除等共同使用唯一保存入口。不得把原子文件写入描述成文件系统与应用卸载的跨操作事务。
 
-### 两种来源的边界
+### 三种来源的边界
 
 - LaunchOS 当前输入与字段以 [唯一接受定义](../../../../assets/interfaces/launchos-layout-import.md) 为准，保持只读。现有 SQLite 循环未检查中途读取失败，完整性处理需补齐。
-- 生产方是 macOS 26 以前系统 Launchpad；消费方是本客户端。支持目标是本机遗留数据及用户选择的备份，恢复页序、组序、名称、成员顺序。源不存在时不能恢复旧位置。
-- **旧系统的路径、表结构、页/组关系、版本识别和备份一致性尚无经验证契约。** 必须从用户授权样本/可靠来源先读出 schema 并分类；若源为 SQLite，还需确认 WAL 等关联数据和一致快照要求。不能凭记忆硬编码表名、静默写源库或声称支持所有旧系统。
-- 旧系统接受定义拟落在 assets/interfaces/legacy-launchpad-layout-import.md，须在实现前完成生产/消费边界、可支持版本、排序/身份映射、错误和样本说明。当前不创建猜测性字段表。
-- 两来源先独立解析为候选 LaunchLayout，再匹配本机应用、校验唯一性/顺序、呈现未匹配项与来源，确认并备份后替换。解析失败/取消/不兼容不得触碰当前布局。
-- 缺失应用是否保留占位、多个初始来源的选择方式以及恢复备份位置，应在该板块方案评审中定稿；不能依赖两个导入器各自作不同决定。
+- macOS 26 以前系统 Launchpad 当前读取 `DARWIN_USER_DIR` 下的升级遗留 SQLite，只接受 apps/groups/items 传统结构；页、文件夹与应用映射见 [接受定义](../../../../assets/interfaces/legacy-launchpad-layout-import.md)。源不存在或结构不兼容时拒绝恢复，不修改系统库。
+- LaunchNext 当前只接受用户选择的官方 JSON 导出，兼容 `launchNext.layout/items` 与较早 `pages` 两种投影；映射与空槽边界见 [接受定义](../../../../assets/interfaces/launchnext-layout-import.md)。不直接读取其 SwiftData 存储。
+- 三来源先独立解析为候选 LaunchLayout，再进入现有 normalize、保存与后台扫描链路。主动导入均先确认覆盖；解析失败或取消不得触碰当前布局。覆盖前自动恢复副本、无法匹配摘要仍是 DATA-11/12 缺口。
 
 ### 本规格实现程度与边界
 
-本规格统一覆盖存量和缺口；存量部分可由当前代码复原，新来源及保护链路仍须完成局部方案评审。无云同步、不修改 Dock 数据库、不做系统权限绕过、不清理用户应用。外部接受定义缺失是 DATA-09 开发的明确门禁，不是整个文档整理的阻断。
+本规格统一覆盖存量和缺口；三类导入器与入口可由当前代码复原，自动恢复副本、坏文件隔离及完整结果摘要仍待收口。无云同步、不修改 Dock 数据库、不做系统权限绕过、不清理用户应用。
 
 ### 启动扫描的响应性
 

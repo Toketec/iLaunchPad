@@ -239,13 +239,42 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     @objc private func toggleLaunchpad() { LaunchpadWindowController.shared.toggle() }
 
-    @objc private func restoreLayout() {
+    @objc private func restoreLaunchOSLayout() {
         let alert = NSAlert()
         alert.messageText = "从 LaunchOS 恢复布局？"
         alert.informativeText = "这会用 LaunchOS 中的排序覆盖当前布局。"
         alert.addButton(withTitle: "恢复")
         alert.addButton(withTitle: "取消")
         if alert.runModal() == .alertFirstButtonReturn { LayoutStore.shared.restoreLaunchOSLayout() }
+    }
+
+    @objc private func restoreLegacyLaunchpadLayout() {
+        confirmLayoutReplacement(
+            title: "从旧版 macOS LaunchPad 恢复布局？",
+            detail: "这会读取系统升级后保留的旧版 LaunchPad 数据并覆盖当前布局。"
+        ) { LayoutStore.shared.restoreLegacyLaunchpadLayout() }
+    }
+
+    @objc private func restoreLaunchNextLayout() {
+        let panel = NSOpenPanel()
+        panel.title = "选择 LaunchNext 导出的布局"
+        panel.message = "请选择 LaunchNext 导出的 JSON 布局文件。"
+        panel.allowedContentTypes = [.json]
+        panel.allowsMultipleSelection = false
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        confirmLayoutReplacement(
+            title: "从 LaunchNext 恢复布局？",
+            detail: "这会用所选 LaunchNext 文件中的排序覆盖当前布局。"
+        ) { LayoutStore.shared.restoreLaunchNextLayout(from: url) }
+    }
+
+    private func confirmLayoutReplacement(title: String, detail: String, action: () -> Void) {
+        let alert = NSAlert()
+        alert.messageText = title
+        alert.informativeText = detail
+        alert.addButton(withTitle: "恢复")
+        alert.addButton(withTitle: "取消")
+        if alert.runModal() == .alertFirstButtonReturn { action() }
     }
 
     @objc private func refreshApplications() {
@@ -261,12 +290,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         appMenu.addItem(withTitle: "显示/隐藏 iLaunchPad", action: #selector(toggleLaunchpad), keyEquivalent: " ")
         appMenu.items.last?.keyEquivalentModifierMask = [.option]
         appMenu.addItem(.separator())
-        appMenu.addItem(withTitle: "从 LaunchOS 恢复布局…", action: #selector(restoreLayout), keyEquivalent: "")
+        let importItem = NSMenuItem(title: "恢复其他启动台布局", action: nil, keyEquivalent: "")
+        let importMenu = NSMenu()
+        importMenu.addItem(withTitle: "从旧版 macOS LaunchPad 恢复…", action: #selector(restoreLegacyLaunchpadLayout), keyEquivalent: "")
+        importMenu.addItem(withTitle: "从 LaunchOS 恢复…", action: #selector(restoreLaunchOSLayout), keyEquivalent: "")
+        importMenu.addItem(withTitle: "从 LaunchNext JSON 恢复…", action: #selector(restoreLaunchNextLayout), keyEquivalent: "")
+        importItem.submenu = importMenu
+        appMenu.addItem(importItem)
         appMenu.addItem(withTitle: "刷新应用列表", action: #selector(refreshApplications), keyEquivalent: "r")
         appMenu.addItem(withTitle: "显示全部隐藏应用", action: #selector(showHiddenApplications), keyEquivalent: "")
         appMenu.addItem(.separator())
         appMenu.addItem(withTitle: "退出 iLaunchPad", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
         for item in appMenu.items where item.action != #selector(NSApplication.terminate(_:)) { item.target = self }
+        for item in importMenu.items { item.target = self }
         appItem.submenu = appMenu
         menu.addItem(appItem)
         NSApp.mainMenu = menu

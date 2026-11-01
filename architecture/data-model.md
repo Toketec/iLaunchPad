@@ -6,6 +6,8 @@
 |:---|:---|:---|
 | 本机布局 | LayoutStore；Library/Application Support/iLaunchPad/layout.json | 唯一持久化布局，应用自行读写 |
 | LaunchOS 排序 | 第三方 LaunchOS.sqlite | 可选的一次性只读迁移来源；不是导入后实时同步源 |
+| 旧版 LaunchPad 排序 | macOS 升级遗留 SQLite | 可选的一次性只读迁移来源；只接受已验证传统投影 |
+| LaunchNext 排序 | 用户选择的官方 JSON 导出 | 可选的一次性只读迁移来源；不读取或修改来源应用存储 |
 | 应用安装、名称、路径、Bundle ID | 文件系统、Bundle 与 NSWorkspace | 扫描补充/启动解析；布局缓存信息不代表应用仍存在 |
 | 偏好与最后页面 | UserDefaults / AppStorage | 独立于布局文件；键与默认值见 runtime.md |
 | 搜索索引、文件存在性 | 内存派生数据 | 可重新计算，不作为持久化事实 |
@@ -28,9 +30,9 @@ LaunchLayout.version 当前默认 1，importedFrom/importedAt 只表示导入来
 
 有可解码自身 JSON 时使用之；否则尝试 LaunchOS 只读迁移；失败则建立至少一张空页。normalize 按非空 Bundle ID、否则 App ID 全局去重，删除空组；扫描 /Applications、/System/Applications、用户 Applications 中 Bundle ID 未见且路径未见的 App，逐个追加至最靠近首页且不足35格的页面末尾，全部满才新建页，不移动已有项。
 
-[LaunchOS 投影](../assets/interfaces/launchos-layout-import.md)只描述当前已接入的兼容源。菜单手动恢复会二次确认，然后替换布局、normalize 并保存；不是合并当前排序。扫描后台执行，只追加新增应用，不自动清除失效记录。结果按最新布局去重合并，拖拽期间暂存，提交/取消完成后再追加保存；刷新/成功导入更新代次，旧结果不生效。
+[LaunchOS 投影](../assets/interfaces/launchos-layout-import.md)、[旧版系统投影](../assets/interfaces/legacy-launchpad-layout-import.md)与 [LaunchNext JSON 投影](../assets/interfaces/launchnext-layout-import.md)分别描述三个兼容源。菜单手动恢复会二次确认，然后替换布局、normalize 并保存；不是合并当前排序。扫描后台执行，只追加新增应用，不自动清除失效记录。结果按最新布局去重合并，拖拽期间暂存，提交/取消完成后再追加保存；刷新/成功导入更新代次，旧结果不生效。
 
-旧系统 Launchpad 数据属于另一个外部来源；当前没有适配器或经验证的接受定义。支持目标（macOS 26 以前的本机遗留数据/备份）在 [spec-001](../sprints/sp-001-native-launchpad/specs/spec-001-app-library-layout/requirements.md)，不将目标解析关系写成本文件的当前运行模型。
+旧系统 Launchpad 入口读取本机升级遗留数据库；LaunchNext 入口读取用户选择的 JSON。两者均先解析为候选 LaunchLayout，成功后才替换当前布局；空槽位不进入紧凑布局模型，无法解析的条目不伪造成已安装应用。
 
 ## 预览事务与状态
 
@@ -57,4 +59,4 @@ LayoutStore 是 MainActor 单一写入口。JSON 使用 prettyPrinted/sortedKeys
 
 Codable 是现有序列化基线；没有按 version 分发的迁移器或明确拒绝未来版本逻辑。新增必需字段、重命名字段和改变 ID 语义前必须补兼容读取策略并在负责规格中验收。未知字段可能被忽略；缺少必需字段会解码失败。
 
-当前启动读取失败会走导入/扫描并保存，因此坏文件可能被新的结果覆盖；没有自动隔离坏文件。恢复操作前应先退出应用并备份 layout.json 与偏好；恢复有效 JSON 后重启，或由用户明确选择 LaunchOS 恢复。不要把迁移工程目录与迁移用户布局混为一谈。
+当前启动读取失败会走导入/扫描并保存，因此坏文件可能被新的结果覆盖；没有自动隔离坏文件。恢复操作前应先退出应用并备份 layout.json 与偏好；恢复有效 JSON 后重启，或由用户明确选择受支持的外部来源恢复。不要把迁移工程目录与迁移用户布局混为一谈。

@@ -27,11 +27,28 @@ enum AppIconCatalog {
     }
 
     static func apply(_ id: String) {
-        guard let image = image(for: id) else { return }
+        let validID = normalizedID(id)
+        guard let image = image(for: validID) else { return }
         NSApp.applicationIconImage = image
         ApplicationIconCache.shared.updateRuntimeIcon(
             image,
             bundleIdentifier: Bundle.main.bundleIdentifier ?? "local.ilaunchpad.app"
         )
+        persistFinderIcon(image, styleID: validID)
+    }
+
+    private static func persistFinderIcon(_ image: NSImage, styleID: String) {
+        let bundlePath = Bundle.main.bundlePath
+        guard bundlePath.hasSuffix(".app") else { return }
+        let workspace = NSWorkspace.shared
+        if styleID == defaultID {
+            // The signed bundle already ships with the ocean icon. Removing a
+            // previous custom file icon restores that default after quitting.
+            _ = workspace.setIcon(nil, forFile: bundlePath, options: [])
+        } else {
+            // NSWorkspace stores a Finder custom icon as file metadata. This
+            // survives process exit without rewriting signed bundle resources.
+            _ = workspace.setIcon(image, forFile: bundlePath, options: [])
+        }
     }
 }

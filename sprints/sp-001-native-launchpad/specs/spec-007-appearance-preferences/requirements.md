@@ -28,7 +28,7 @@ PREF-05打开前使用launchpadWillPresent携带目标页，RootView无动画清
 
 WallpaperBackdropView按当前屏壁纸URL/模糊半径缓存，缩图后做背景模糊，不可读回退；FolderOverlay额外within-window模糊属于文件夹层级，不由壁纸档位替代。系统减少动态效果影响开合、翻页、重排/抖动，但功能完成回调仍必须发生。
 
-AppIconCatalog 枚举稳定 ID 和中文名称，appIconStyle 默认 ocean。设置以原生按钮展示可用预览、选中态与辅助功能标签，选择后通过 NSApplication.applicationIconImage 即时更新 Dock/应用切换器，并把同一发布图写入启动台内部的本应用缓存后发送局部刷新通知；启动时恢复选择。未知或已删除 ID 回退 ocean；访达使用同一份 ocean 发布图生成的包图标。图标目录与发布素材生产契约见[冲刺 2 spec-001](../../../sp-002-brand-and-website/specs/spec-001-app-icon-design/requirements.md)。
+AppIconCatalog 枚举稳定 ID 和中文名称，appIconStyle 默认 ocean。设置以原生按钮展示可用预览、选中态与辅助功能标签，选择后通过 NSApplication.applicationIconImage 即时更新进程图标，并把同一发布图写入启动台内部缓存；NSWorkspace 文件图标元数据保存非默认选择，使 Dock 与访达在退出后仍保持。恢复 ocean 时清除自定义文件图标，回到签名包的默认海蓝图标。未知或已删除 ID 回退 ocean。图标目录与发布素材生产契约见[冲刺 2 spec-001](../../../sp-002-brand-and-website/specs/spec-001-app-icon-design/requirements.md)。
 
 ### 整体收口
 

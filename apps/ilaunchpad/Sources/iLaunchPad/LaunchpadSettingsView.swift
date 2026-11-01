@@ -39,7 +39,7 @@ struct LaunchpadSettingsView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 18) {
                     Text("选择你的火箭").font(.title2.bold())
-                    Text("用于 Dock 与应用切换器，选择后即时生效并保留。访达显示默认海蓝图标。")
+                    Text("用于 Dock、访达与应用切换器，选择后即时生效，退出后仍会保留。")
                         .font(.callout).foregroundStyle(.secondary)
                     LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 5), spacing: 20) {
                         ForEach(AppIconCatalog.choices) { choice in

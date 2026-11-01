@@ -22,7 +22,7 @@ swift test --package-path apps/ilaunchpad
 
 Option-Space 或 F4 显示/隐藏；双指滑动、页点或 Command-左右切页；输入名称/拼音搜索，方向键选择，回车启动。输入法有 marked text 时保留输入法处理。长按进入编辑，完成按钮退出。Esc 优先取消拖拽，之后按编辑、文件夹、搜索、窗口层级退出。
 
-设置提供图标比例、名称开关、壁纸模糊、回第一页偏好及十款应用图标。未设置起始页时回首页；显式关闭后记忆上次页。应用图标在Dock/应用切换器即时生效并在重启后保持，访达使用默认石墨灰图标。安装目录变化自动触发后台核对，新应用追加到最靠近首页且未满35格的页面末尾；所有页满才新建页。刷新应用列表还会清空图标缓存；显示全部隐藏应用恢复普通组的隐藏项。从 LaunchOS 恢复布局有确认提示，确认后覆盖当前排序。
+设置提供图标比例、名称开关、壁纸模糊、回第一页偏好及四款应用图标。未设置起始页时回首页；显式关闭后记忆上次页。应用图标在 Dock、访达、应用切换器和启动台内即时生效，退出后仍保持；恢复默认时回到海蓝包图标。安装目录变化自动触发后台核对，新应用追加到最靠近首页且未满35格的页面末尾；所有页满才新建页。刷新应用列表还会清空图标缓存；显示全部隐藏应用恢复普通组的隐藏项。菜单提供旧版 macOS LaunchPad、LaunchOS 与 LaunchNext 三种只读恢复入口，确认后覆盖当前排序。
 
 ## 数据与恢复 / Recovery
 
@@ -34,7 +34,7 @@ Option-Space 或 F4 显示/隐藏；双指滑动、页点或 Command-左右切�
 
 确认后只使用系统废纸篓 API 移动当前 `.app` 应用包；成功才从 iLaunchPad 布局移除，取消或失败均保留图标和布局。此操作不清理文稿、设置、缓存、共享容器或辅助文件，也不取消订阅；清倒废纸篓前可以从废纸篓恢复应用包。参考 [Apple卸载说明](https://support.apple.com/zh-cn/102610) 和 [FileManager.trashItem](https://developer.apple.com/documentation/foundation/filemanager/trashitem(at:resultingitemurl:))。
 
-LaunchOS 导入成功并已有有效 layout.json 后，iLaunchPad 不需要 LaunchOS 继续安装或运行。JSON 中的 importedFrom 是来源记录，名称带 launchos 的已有 ID 是稳定标识，不是实时数据依赖。卸载旧启动器前先退出 iLaunchPad 并复制自己的布局备份；兼容导入代码只用于帮助迁移用户，不代表品牌关联或运行依赖。
+任一外部布局导入成功并已有有效 layout.json 后，iLaunchPad 不需要来源启动器继续安装或运行。JSON 中的 importedFrom 是来源记录，导入生成的来源前缀 ID 是稳定标识，不是实时数据依赖。卸载旧启动器前先退出 iLaunchPad 并复制自己的布局备份；兼容导入代码只用于帮助迁移用户，不代表品牌关联或运行依赖。
 
 ## 平台观察与参考 / Platform notes
 

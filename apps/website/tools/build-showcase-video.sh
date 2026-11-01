@@ -52,7 +52,7 @@ ffmpeg -hide_banner -loglevel error -y \
   -i "$work_dir/01-pages.mp4" -i "$work_dir/02-search.mp4" -i "$work_dir/03-drag.mp4" \
   -i "$work_dir/04-folder.mp4" -i "$work_dir/05-edit.mp4" \
   -filter_complex "[0:v][1:v]xfade=transition=fade:duration=0.35:offset=5.15[x1];[x1][2:v]xfade=transition=fade:duration=0.35:offset=10.30[x2];[x2][3:v]xfade=transition=fade:duration=0.35:offset=16.45[x3];[x3][4:v]xfade=transition=fade:duration=0.35:offset=24.10,format=yuv420p[v]" \
-  -map "[v]" -an -r 60 -c:v libx264 -profile:v high -level 5.1 -preset slow -crf 18 \
+  -map "[v]" -an -r 60 -c:v libx264 -profile:v high -level 5.1 -preset slow -crf 22 \
   -movflags +faststart "$output_dir/hero-demo.mp4"
 
 ffmpeg -hide_banner -loglevel error -y \
@@ -61,11 +61,12 @@ ffmpeg -hide_banner -loglevel error -y \
   -map "[v]" -an -r 60 -c:v libx264 -profile:v high -level 5.1 -preset slow -crf 18 \
   -movflags +faststart "$output_dir/interaction.mp4"
 
-for video in hero-demo interaction; do
-  ffmpeg -hide_banner -loglevel error -y -i "$output_dir/$video.mp4" -an \
-    -c:v libvpx-vp9 -b:v 0 -crf 30 -row-mt 1 -cpu-used 4 -deadline good \
-    "$output_dir/$video.webm"
-done
+ffmpeg -hide_banner -loglevel error -y -i "$output_dir/hero-demo.mp4" -an \
+  -c:v libvpx-vp9 -b:v 0 -crf 35 -row-mt 1 -cpu-used 4 -deadline good \
+  "$output_dir/hero-demo.webm"
+ffmpeg -hide_banner -loglevel error -y -i "$output_dir/interaction.mp4" -an \
+  -c:v libvpx-vp9 -b:v 0 -crf 30 -row-mt 1 -cpu-used 4 -deadline good \
+  "$output_dir/interaction.webm"
 
 print "created: $output_dir/hero-demo.mp4"
 print "created: $output_dir/hero-demo.webm"

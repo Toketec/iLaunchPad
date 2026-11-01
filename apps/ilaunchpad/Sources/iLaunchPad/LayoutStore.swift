@@ -444,8 +444,20 @@ final class LayoutStore: ObservableObject {
     }
 
     func restoreLaunchOSLayout() {
+        replaceLayout { try LaunchOSImporter.importLayout() }
+    }
+
+    func restoreLegacyLaunchpadLayout(from url: URL? = nil) {
+        replaceLayout { try LegacyLaunchpadImporter.importLayout(from: url) }
+    }
+
+    func restoreLaunchNextLayout(from url: URL) {
+        replaceLayout { try LaunchNextImporter.importLayout(from: url) }
+    }
+
+    private func replaceLayout(_ importer: () throws -> LaunchLayout) {
         do {
-            layout = try LaunchOSImporter.importLayout()
+            layout = try importer()
             scanTask?.cancel()
             scanGeneration = UUID()
             deferredScan = nil

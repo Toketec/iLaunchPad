@@ -2,9 +2,9 @@
 
 ## 运行单元与依赖
 
-本地运行单元是一个 iLaunchPad.app GUI 进程，应用标识 local.ilaunchpad.app，当前包版本 2.3.2/build 12。窗口、布局、输入监听和 UI 共享故障域。另有一个独立静态产品官网，不与客户端通信。没有监听端口、后台服务、数据库服务、远程 API、队列、容器或集群部署。
+本地运行单元是一个 iLaunchPad.app GUI 进程，应用标识 local.ilaunchpad.app，当前包版本 2.3.5/build 14。窗口、布局、输入监听和 UI 共享故障域。另有一个独立静态产品官网，不与客户端通信。没有监听端口、后台服务、数据库服务、远程 API、队列、容器或集群部署。
 
-运行需要 macOS 26.0 及系统 AppKit、SwiftUI、Carbon、CoreImage、SQLite3。应用读取当前用户目录、系统应用目录和桌面壁纸；LaunchOS SQLite 仅在兼容导入时可选读取，来源应用无需运行。无运行密钥、账号令牌或网络依赖。
+运行需要 macOS 26.0 及系统 AppKit、SwiftUI、Carbon、CoreImage、SQLite3。应用读取当前用户目录、系统应用目录和桌面壁纸；外部布局只在用户选择或首次 LaunchOS 迁移时只读，来源应用无需运行。无运行密钥、账号令牌或网络依赖。
 
 ## 构建与部署
 
@@ -29,9 +29,9 @@ LayoutStore修改、JSON保存及UI在MainActor；扫描由串行ScanWorker执�
 | showNames | true | 显示应用名称 |
 | returnToFirstPage | true | 未配置时回首页，保留用户显式false（记忆上次页） |
 | lastPage | 0 | 记住页面，显示时按实际页数校正 |
-| appIconStyle | ocean | 四款应用标识的稳定 ID；未知或已删除 ID 自动迁移到 ocean，Dock 和应用切换器使用，访达保留海蓝包图标 |
+| appIconStyle | ocean | 四款应用标识的稳定 ID；未知或已删除 ID 回退 ocean；Dock、访达、应用切换器与启动台内图标保持一致，退出后保留 |
 
-布局位置为用户 Library/Application Support/iLaunchPad/layout.json；可选兼容源为同级 LaunchOS/LaunchOS.sqlite。偏好走 AppStorage 即时更新。图标存在性通过刷新清空；缓存目录为用户Caches/local.ilaunchpad.app/VisualResources/v1。图标键包含身份、规范路径、版本/资源指纹、256px规格、外观及系统版本；壁纸键包含源指纹、屏幕与模糊半径。重新显示后台复核。登录开关不另存UserDefaults，requiresApproval/notFound/操作错误如实反馈。包最低系统和版本字段见工程 Resources/Info.plist。无环境变量配置模板需要填写。
+布局位置为用户 Library/Application Support/iLaunchPad/layout.json；可选兼容源包括同级 LaunchOS/LaunchOS.sqlite、DARWIN_USER_DIR 下旧版系统数据库和用户选择的 LaunchNext JSON。偏好走 AppStorage 即时更新。图标存在性通过刷新清空；缓存目录为用户Caches/local.ilaunchpad.app/VisualResources/v1。图标键包含身份、规范路径、版本/资源指纹、256px规格、外观及系统版本；壁纸键包含源指纹、屏幕与模糊半径。重新显示后台复核。登录开关不另存UserDefaults，requiresApproval/notFound/操作错误如实反馈。包最低系统和版本字段见工程 Resources/Info.plist。无环境变量配置模板需要填写。
 
 ## 失败与恢复
 
@@ -39,6 +39,7 @@ LayoutStore修改、JSON保存及UI在MainActor；扫描由串行ScanWorker执�
 |:---|:---|:---|
 | 自有 JSON 不存在/不可解码 | 尝试兼容导入，失败再空布局扫描；之后保存 | 退出后恢复备份；当前无坏文件隔离 |
 | LaunchOS 源缺失、无法打开或 SQL 准备失败 | 首次自动导入失败被回退逻辑吸收；手动导入显示错误 | 不修改源库；保留现有自身布局 |
+| 旧版系统或 LaunchNext 源缺失、格式不兼容 | 手动导入显示错误，候选布局不赋值 | 不修改源文件；保留现有自身布局 |
 | 保存失败 | lastError 弹窗，内存变化可能仍在，磁盘未更新 | 处理权限/磁盘问题后再次保存操作；无自动重试 |
 | App 路径失效 | 按 Bundle ID 再解析，找不到则报错 | 用户刷新、修复安装或移除失效项 |
 | 启动应用失败 | NSWorkspace 回调设置 lastError | 启动台已请求关闭；错误可在再次显示时查看 |
