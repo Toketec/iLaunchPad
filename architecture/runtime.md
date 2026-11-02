@@ -31,13 +31,15 @@ LayoutStore修改、JSON保存及UI在MainActor；扫描由串行ScanWorker执�
 | lastPage | 0 | 记住页面，显示时按实际页数校正 |
 | appIconStyle | ocean | 四款应用标识的稳定 ID；未知或已删除 ID 回退 ocean；Dock、访达、应用切换器与启动台内图标保持一致，退出后保留 |
 
-布局位置为用户 Library/Application Support/iLaunchPad/layout.json；可选兼容源包括同级 LaunchOS/LaunchOS.sqlite、DARWIN_USER_DIR 下旧版系统数据库和用户选择的 LaunchNext JSON。偏好走 AppStorage 即时更新。图标存在性通过刷新清空；缓存目录为用户Caches/local.ilaunchpad.app/VisualResources/v1。图标键包含身份、规范路径、版本/资源指纹、256px规格、外观及系统版本；壁纸键包含源指纹、屏幕与模糊半径。重新显示后台复核。登录开关不另存UserDefaults，requiresApproval/notFound/操作错误如实反馈。包最低系统和版本字段见工程 Resources/Info.plist。无环境变量配置模板需要填写。
+当前布局位于用户 Library/Application Support/iLaunchPad/layout.json，最多 3 份用户命名快照位于同目录 layout-backups.json；Apple 默认风格布局由代码按当前应用清单生成，不另存模板文件。可选兼容源包括同级 LaunchOS/LaunchOS.sqlite、DARWIN_USER_DIR 下旧版系统数据库和用户选择的 LaunchNext JSON。偏好走 AppStorage 即时更新。图标存在性通过刷新清空；缓存目录为用户Caches/local.ilaunchpad.app/VisualResources/v1。图标键包含身份、规范路径、版本/资源指纹、256px规格、外观及系统版本；壁纸键包含源指纹、屏幕与模糊半径。重新显示后台复核。登录开关不另存UserDefaults，requiresApproval/notFound/操作错误如实反馈。包最低系统和版本字段见工程 Resources/Info.plist。无环境变量配置模板需要填写。
 
 ## 失败与恢复
 
 | 失败 | 当前行为 | 恢复边界 |
 |:---|:---|:---|
-| 自有 JSON 不存在/不可解码 | 尝试兼容导入，失败再空布局扫描；之后保存 | 退出后恢复备份；当前无坏文件隔离 |
+| 自有 JSON 不存在/不可解码 | 尝试 LaunchOS 自动导入；失败则在首次完整扫描后生成 Apple 默认风格布局并保存 | 可从用户快照、外部来源或额外文件备份恢复；当前无坏文件隔离 |
+| 备份目录不存在/不可解码 | 当前布局继续工作；设置显示空目录或错误 | 不覆盖当前布局；修复或移走损坏的 layout-backups.json 后重建快照 |
+| 备份恢复或默认初始化时扫描为空/失败 | 拒绝替换并保留当前布局 | 应用目录恢复可读后重试 |
 | LaunchOS 源缺失、无法打开或 SQL 准备失败 | 首次自动导入失败被回退逻辑吸收；手动导入显示错误 | 不修改源库；保留现有自身布局 |
 | 旧版系统或 LaunchNext 源缺失、格式不兼容 | 手动导入显示错误，候选布局不赋值 | 不修改源文件；保留现有自身布局 |
 | 保存失败 | lastError 弹窗，内存变化可能仍在，磁盘未更新 | 处理权限/磁盘问题后再次保存操作；无自动重试 |
@@ -54,4 +56,4 @@ Dock 隐藏是本应用 presentationOptions，正常隐藏和退出恢复先前�
 
 设计为单个用户会话本地使用，不支持水平扩容或多实例并发编辑。扫描按 Bundle ID 和路径避重复；finishDragPreview 在无快照时无效，防止重复结束提交。缓存降低重复图标读取，背景图缩至至多约 1800px 宽再模糊；没有大型目录专门背压或容量承诺。
 
-正常运行有界面 lastError 和 import-only 的统计输出；诊断时可显式设置 ILAUNCHPAD_DRAG_TRACE=1，将会话、接收校验和命中层级写到标准错误，默认关闭、不上传应用清单。无遥测、性能采样、结构化审计、指标端点或应用内自动备份。恢复依赖人工备份 layout.json 和偏好；应用包可重新构建，用户布局不能由源码恢复。被移到废纸篓的应用由用户恢复，辅助文档不删除。技术目标与实测边界见非功能约束和各功能规格 check.md。
+正常运行有界面 lastError 和 import-only 的统计输出；诊断时可显式设置 ILAUNCHPAD_DRAG_TRACE=1，将会话、接收校验和命中层级写到标准错误，默认关闭、不上传应用清单。无遥测、性能采样、结构化审计、指标端点或滚动自动历史。应用内允许用户保存最多 3 份命名布局快照；更强恢复仍依赖额外复制 layout.json、layout-backups.json 与偏好。应用包可重新构建，用户自定义排序不能由源码恢复。被移到废纸篓的应用由用户恢复，辅助文档不删除。技术目标与实测边界见非功能约束和各功能规格 check.md。

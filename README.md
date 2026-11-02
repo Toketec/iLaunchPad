@@ -39,6 +39,8 @@
 - **连续整理**：拖动中的预览、换位、切页、文件夹展开与落位保持在同一次交互里。
 - **原生质感**：AppKit 应用网格、系统搜索框、玻璃材质与原生确认弹窗。
 - **兼容迁移**：可只读导入旧版 macOS LaunchPad、LaunchOS 与 LaunchNext 布局；导入后完全使用 iLaunchPad 自己的数据。
+- **没有旧布局也能开始**：无可导入数据时按当前已安装应用生成 Apple 默认风格布局，设置中也可随时重新初始化。
+- **本地布局快照**：最多保存 3 份命名备份，恢复时自动清理已卸载项并补入新应用。
 - **安全管理**：系统组件不显示移除入口；其他符合条件的应用经确认后只移到废纸篓。
 - **性能优先**：后台扫描、图标与壁纸缓存、按页准备资源，并尊重“减少动态效果”。
 
@@ -68,7 +70,7 @@ open apps/ilaunchpad/dist/iLaunchPad.app
 | 查找 / 启动 | 输入名称或拼音，方向键选择，Return 打开 |
 | 整理应用 | 拖动图标；长按进入编辑模式 |
 | 取消 / 返回 | Esc：依次取消拖拽、编辑、文件夹、搜索或窗口 |
-| 调整偏好 | 设置中调整图标大小、名称、壁纸模糊、起始页与登录启动 |
+| 调整偏好 | 设置中调整图标大小、名称、壁纸模糊、起始页、布局备份与登录启动 |
 
 ## 四款原创玻璃图标
 
@@ -88,13 +90,14 @@ open apps/ilaunchpad/dist/iLaunchPad.app
 
 ```text
 ~/Library/Application Support/iLaunchPad/layout.json
+~/Library/Application Support/iLaunchPad/layout-backups.json
 ```
 
-这是 iLaunchPad 自己的布局文件。已有有效布局时，应用直接读取它。图标和壁纸缓存可以重建，**缓存不是布局备份**；备份或恢复前应先退出 iLaunchPad。
+`layout.json` 是当前布局，`layout-backups.json` 保存设置中创建的最多 3 份命名快照。恢复快照时会重新扫描应用目录：已卸载应用从当前布局移除，新安装应用追加到最靠近首页的空位；原快照不会被反写。图标和壁纸缓存可以重建，不属于布局数据。
 
 ### 从其他启动台迁移
 
-如果本机尚无 iLaunchPad 布局、但存在兼容的 LaunchOS 数据库，首次打开会只读复制页面、文件夹与应用顺序。应用菜单也可分别恢复系统升级后遗留的旧版 macOS LaunchPad 数据，或选择 LaunchNext 导出的 JSON。之后不要求来源启动器继续安装或运行；该能力只做数据兼容，不复制对方代码、素材、文案或品牌设计。
+如果本机尚无 iLaunchPad 布局、但存在兼容的 LaunchOS 数据库，首次打开会只读复制页面、文件夹与应用顺序。应用菜单也可分别恢复系统升级后遗留的旧版 macOS LaunchPad 数据，或选择 LaunchNext 导出的 JSON。若不存在任何可导入数据，iLaunchPad 会根据当前已安装应用生成 Apple 默认风格布局；之后也能在设置中确认后重新初始化。来源启动器无需继续安装或运行；兼容能力只处理数据，不复制对方代码、素材、文案或品牌设计。
 
 ### “卸载”会删除什么？
 
@@ -118,7 +121,7 @@ iLaunchPad 使用 [SpecRocket](https://github.com/Toketec/SpecRocket) 管理产�
 
 | 板块 | 当前状态 |
 |:---|:---|
-| 应用目录 / 布局 / 导入 | 已有本机扫描、自动发现、靠前空位追加、保存，以及旧版 macOS LaunchPad、LaunchOS、LaunchNext 只读迁移；真实来源样本仍需扩充验收 |
+| 应用目录 / 布局 / 导入 | 已有完整目录对账、Apple 默认风格初始化、最多 3 份本地快照，以及旧版 macOS LaunchPad、LaunchOS、LaunchNext 只读迁移；真实来源样本与设置交互仍需人工验收 |
 | 唤起与系统集成 | 已有快捷键、全屏窗口、Dock 与登录启动接线；登录启动仍待真实环境复验 |
 | 浏览 / 分页 / 搜索 / 启动 | 主要链路、后台位图缓存与按页准备已实现；完整帧时和输入组合待验 |
 | 文件夹管理 | 已有单层组、玻璃开合、命名、单成员自动解散与临时合组 |
@@ -148,6 +151,7 @@ swift test --package-path apps/ilaunchpad
 - [产品官网](https://toketec.github.io/iLaunchPad/) · [官网规格](sprints/sp-002-brand-and-website/specs/spec-002-product-website/requirements.md)
 - [产品概览](docs/product-overview.md) · [非功能约束](docs/non-functional-reqs.md) · [视觉语言](docs/visual-design.md)
 - [冲刺 1：启动台功能](sprints/sp-001-native-launchpad/docs/functional-overview.md) · [业务规则](sprints/sp-001-native-launchpad/docs/SPRINT-features.md)
+- [冲刺 3：默认布局与本地备份](sprints/sp-003-layout-backups/docs/functional-overview.md) · [实现规格](sprints/sp-003-layout-backups/specs/spec-001-layout-profiles/requirements.md)
 - [用户场景](sprints/sp-001-native-launchpad/docs/user-scenarios.md) · [业务流程](sprints/sp-001-native-launchpad/docs/business-flows.md) · [界面结构](sprints/sp-001-native-launchpad/docs/prototypes/prototypes.md)
 - [模块职责](architecture/architecture.md) · [数据模型](architecture/data-model.md) · [运行恢复](architecture/runtime.md)
 - [构建与恢复手册](assets/manuals/build-and-recovery.md) · [协作规则](AGENTS.md)

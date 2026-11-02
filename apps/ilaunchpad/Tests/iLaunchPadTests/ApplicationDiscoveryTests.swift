@@ -15,7 +15,9 @@ struct ApplicationDiscoveryTests {
             })
         }
         let store = LayoutStore(layout: LaunchLayout(pages: pages), storageURL: directory.appendingPathComponent("layout.json"))
-        store.receiveScannedApplications([app("new-a"), app("new-b"), app("new-c"), app("new-a")], generation: store.scanGeneration)
+        let installed = pages.flatMap(\.groups).flatMap(\.apps)
+            + [app("new-a"), app("new-b"), app("new-c"), app("new-a")]
+        store.receiveScannedApplications(installed, generation: store.scanGeneration)
         #expect(store.layout.pages.map { $0.groups.count } == [35, 35, 3])
         #expect(store.layout.pages[0].groups.last?.apps.first?.id == "new-a")
         #expect(store.layout.pages[1].groups.last?.apps.first?.id == "new-b")

@@ -6,8 +6,11 @@ final class LayoutStore: ObservableObject {
     @Published private(set) var layout: LaunchLayout
     @Published var lastError: String?
     @Published var isEditing = false
+    @Published private(set) var layoutBackups: [LayoutBackupSummary] = []
+    @Published private(set) var isRestoringLayout = false
     private var dragSnapshot: LaunchLayout?
     private var scanTask: Task<Void, Never>?
+    private var layoutRestoreTask: Task<Void, Never>?
     private var directoryMonitor: ApplicationDirectoryMonitor?
     private var scanInProgress = false
     private var lastScanStarted = Date.distantPast
@@ -229,29 +232,37 @@ final class LayoutStore: ObservableObject {
     private let fileManager = FileManager.default
     private let supportURL: URL
     private let layoutURL: URL
+    private let backupRepository: LayoutBackupRepository
     private let scansApplications: Bool
+    private var needsAppleDefaultInitialization: Bool
 
     private init() {
         scansApplications = true
         supportURL = FileManager.default.homeDirectoryForCurrentUser
             .appendingPathComponent("Library/Application Support/iLaunchPad", isDirectory: true)
         layoutURL = supportURL.appendingPathComponent("layout.json")
+        backupRepository = LayoutBackupRepository(fileURL: supportURL.appendingPathComponent("layout-backups.json"))
 
         if let data = try? Data(contentsOf: layoutURL),
            let saved = try? JSONDecoder.layoutDecoder.decode(LaunchLayout.self, from: data) {
             layout = saved
+            needsAppleDefaultInitialization = false
         } else if let imported = try? LaunchOSImporter.importLayout() {
             layout = imported
+            needsAppleDefaultInitialization = false
         } else {
             layout = LaunchLayout(pages: [LaunchPage(id: UUID().uuidString, groups: [])])
+            needsAppleDefaultInitialization = true
         }
+        layoutBackups = backupRepository.summaries
+        if let error = backupRepository.loadErrorDescription { lastError = error }
         normalize()
         directoryMonitor = ApplicationDirectoryMonitor(roots: ApplicationScanner.roots) { [weak self] in
             ApplicationIconCache.shared.clear()
             self?.refreshInstalledApplications()
         }
         refreshInstalledApplications()
-        save()
+        if !needsAppleDefaultInitialization { save() }
     }
 
     // Isolated storage for interaction regression tests; never scans real apps.
@@ -260,6 +271,9 @@ final class LayoutStore: ObservableObject {
         self.layout = layout
         layoutURL = storageURL
         supportURL = storageURL.deletingLastPathComponent()
+        backupRepository = LayoutBackupRepository(fileURL: supportURL.appendingPathComponent("layout-backups.json"))
+        needsAppleDefaultInitialization = false
+        layoutBackups = backupRepository.summaries
     }
 
     func beginDragPreview() {
@@ -455,9 +469,110 @@ final class LayoutStore: ObservableObject {
         replaceLayout { try LaunchNextImporter.importLayout(from: url) }
     }
 
+    var canCreateLayoutBackup: Bool {
+        layoutBackups.count < LayoutBackupRepository.maximumCount && !isRestoringLayout
+    }
+
+    func createLayoutBackup(named name: String) {
+        guard !isRestoringLayout else { return }
+        do {
+            try backupRepository.create(name: name, layout: layout)
+            refreshLayoutBackupSummaries()
+        } catch {
+            lastError = error.localizedDescription
+        }
+    }
+
+    func overwriteLayoutBackup(id: String) {
+        guard !isRestoringLayout else { return }
+        do {
+            try backupRepository.overwrite(id: id, layout: layout)
+            refreshLayoutBackupSummaries()
+        } catch {
+            lastError = error.localizedDescription
+        }
+    }
+
+    func renameLayoutBackup(id: String, name: String) {
+        guard !isRestoringLayout else { return }
+        do {
+            try backupRepository.rename(id: id, name: name)
+            refreshLayoutBackupSummaries()
+        } catch {
+            lastError = error.localizedDescription
+        }
+    }
+
+    func deleteLayoutBackup(id: String) {
+        guard !isRestoringLayout else { return }
+        do {
+            try backupRepository.delete(id: id)
+            refreshLayoutBackupSummaries()
+        } catch {
+            lastError = error.localizedDescription
+        }
+    }
+
+    func restoreLayoutBackup(id: String) {
+        guard let snapshot = backupRepository.layout(for: id) else {
+            lastError = LayoutBackupError.missingBackup.localizedDescription
+            return
+        }
+        beginLayoutRestore(snapshot: snapshot)
+    }
+
+    func restoreAppleDefaultLayout() {
+        beginLayoutRestore(snapshot: nil)
+    }
+
+    private func refreshLayoutBackupSummaries() {
+        layoutBackups = backupRepository.summaries
+    }
+
+    private func beginLayoutRestore(snapshot: LaunchLayout?) {
+        guard scansApplications, !isRestoringLayout else { return }
+        guard !isPreviewingDrag else {
+            lastError = LayoutBackupError.dragInProgress.localizedDescription
+            return
+        }
+        isRestoringLayout = true
+        scanTask?.cancel()
+        scanGeneration = UUID()
+        deferredScan = nil
+        scanInProgress = true
+        layoutRestoreTask?.cancel()
+        layoutRestoreTask = Task { [weak self] in
+            let installedApps = await ApplicationScanner.scanInBackground()
+            guard !Task.isCancelled, let self else { return }
+            defer {
+                self.scanInProgress = false
+                self.isRestoringLayout = false
+            }
+            guard !installedApps.isEmpty else {
+                self.lastError = LayoutBackupError.emptyApplicationScan.localizedDescription
+                return
+            }
+            let candidate = snapshot.map { InstalledApplicationReconciler.reconcile($0, with: installedApps) }
+                ?? AppleDefaultLayoutFactory.make(from: installedApps)
+            do {
+                try self.writeLayout(candidate)
+                self.scanTask?.cancel()
+                self.scanGeneration = UUID()
+                self.deferredScan = nil
+                self.needsAppleDefaultInitialization = false
+                self.layout = candidate
+                ApplicationIconCache.shared.clear()
+                NotificationCenter.default.post(name: .launchpadLayoutRestored, object: self)
+            } catch {
+                self.lastError = "无法切换启动台布局：\(error.localizedDescription)"
+            }
+        }
+    }
+
     private func replaceLayout(_ importer: () throws -> LaunchLayout) {
         do {
             layout = try importer()
+            needsAppleDefaultInitialization = false
             scanTask?.cancel()
             scanGeneration = UUID()
             deferredScan = nil
@@ -470,7 +585,7 @@ final class LayoutStore: ObservableObject {
     }
 
     func refreshInstalledApplications() {
-        guard scansApplications else { return }
+        guard scansApplications, !isRestoringLayout else { return }
         scanInProgress = true
         lastScanStarted = Date()
         scanTask?.cancel()
@@ -488,29 +603,16 @@ final class LayoutStore: ObservableObject {
         guard generation == scanGeneration else { return }
         scanInProgress = false
         guard !isPreviewingDrag else { deferredScan = apps; return }
-        var knownBundleIDs = Set(allApps().map(\.bundleIdentifier).filter { !$0.isEmpty })
-        var knownPaths = Set(allApps().compactMap { $0.fileURL?.standardizedFileURL.path })
-        var newApps: [LaunchApp] = []
-        for app in apps {
-            let path = app.fileURL?.standardizedFileURL.path ?? app.path
-            guard !knownBundleIDs.contains(app.bundleIdentifier), !knownPaths.contains(path) else { continue }
-            knownBundleIDs.insert(app.bundleIdentifier)
-            knownPaths.insert(path)
-            newApps.append(app)
+        guard !apps.isEmpty else { return }
+        if needsAppleDefaultInitialization {
+            layout = AppleDefaultLayoutFactory.make(from: apps)
+            needsAppleDefaultInitialization = false
+            save()
+            return
         }
-        guard !newApps.isEmpty else { return }
-
-        for app in newApps {
-            let page = ApplicationDiscoveryPolicy.insertionPage(groupCounts: layout.pages.map { $0.groups.count })
-            if page == layout.pages.count {
-                layout.pages.append(LaunchPage(id: UUID().uuidString, groups: []))
-            }
-            layout.pages[page].groups.append(
-                LaunchGroup(id: UUID().uuidString, name: "", isFolder: false, apps: [app])
-            )
-            knownBundleIDs.insert(app.bundleIdentifier)
-            knownPaths.insert(app.fileURL?.standardizedFileURL.path ?? app.path)
-        }
+        let reconciled = InstalledApplicationReconciler.reconcile(layout, with: apps)
+        guard reconciled != layout else { return }
+        layout = reconciled
         save()
     }
 
@@ -588,12 +690,16 @@ final class LayoutStore: ObservableObject {
     private func save() {
         guard !isPreviewingDrag else { return }
         do {
-            try fileManager.createDirectory(at: supportURL, withIntermediateDirectories: true)
-            let data = try JSONEncoder.layoutEncoder.encode(layout)
-            try data.write(to: layoutURL, options: .atomic)
+            try writeLayout(layout)
         } catch {
             lastError = "无法保存启动台布局：\(error.localizedDescription)"
         }
+    }
+
+    private func writeLayout(_ value: LaunchLayout) throws {
+        try fileManager.createDirectory(at: supportURL, withIntermediateDirectories: true)
+        let data = try JSONEncoder.layoutEncoder.encode(value)
+        try data.write(to: layoutURL, options: .atomic)
     }
 }
 

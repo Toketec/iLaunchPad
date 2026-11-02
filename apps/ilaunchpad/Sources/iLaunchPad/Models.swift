@@ -32,7 +32,7 @@ struct LaunchPage: Codable, Identifiable, Hashable, Sendable {
     var groups: [LaunchGroup]
 }
 
-struct LaunchLayout: Codable, Sendable {
+struct LaunchLayout: Codable, Hashable, Sendable {
     var version: Int = 1
     var importedFrom: String?
     var importedAt: Date?

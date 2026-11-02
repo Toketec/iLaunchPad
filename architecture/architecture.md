@@ -18,14 +18,15 @@ iLaunchPad 有两个独立交付单元：`apps/ilaunchpad/` 是 macOS GUI 客户
 | PagingSurface | 一个屏幕宽度的原生裁剪容器承载全部页面；处理位移、边缘阻尼、速度预测与落页 |
 | FolderOverlay / FolderMorphSurface | 组内网格、名称编辑、原生玻璃面板和连续展开变换 |
 | DragTracking / FolderDragBoundary | 先路由容器边界，再计算格子位置；离开文件夹判断、停留和最终 drop |
-| LayoutStore / Models | 页面、组、应用的唯一内存模型与保存入口；快照、移动、导入、扫描合并、隐藏 |
+| LayoutStore / Models | 页面、组、应用的唯一内存模型与保存入口；快照、移动、导入、目录对账、隐藏 |
+| LayoutBackups / AppleDefaultLayoutFactory | 维护最多 3 份用户命名的布局快照；按当前已安装应用生成 Apple 默认风格初始布局；恢复前统一对账应用目录 |
 | LaunchOSImporter / LegacyLaunchpadImporter / LaunchNextImporter / ApplicationScanner | 三类外部布局只读投影；扫描三个应用根目录并按 Bundle ID 去重 |
-| ApplicationDirectoryMonitor / ApplicationDiscoveryPolicy | 原生FSEvents目录变化通知去抖触发后台扫描；新项追加到首个不足35格的页面，所有页满才新建页 |
+| ApplicationDirectoryMonitor / ApplicationDiscoveryPolicy | 原生FSEvents目录变化通知去抖触发后台扫描；完整对账已安装应用，清除失效项、刷新元数据并把新增项追加到首个不足35格的页面 |
 | AppIconCatalog | 消费冲刺 2 提供的包内 PNG 与稳定选择 ID；NSApplication 更新进程图标，NSWorkspace 文件图标元数据保证退出后仍保持选择，不改签名资源 |
 | ApplicationSearchEntry | 从应用名称、拼音、首字母、Bundle ID 生成派生搜索索引 |
 | LaunchpadDesign / WallpaperBackdropView / VisualEffectView / AppIconView | 网格几何、图标缓存、壁纸模糊和原生材质；部分 SwiftUI 图标组件与 DragSupport 委托是现存辅助实现，主网格走 NativeLaunchGrid |
 | ApplicationRemoval / ApplicationRemovalPolicy | 系统保护、可删除性与原生确认；确认后只用系统废纸篓 API 移动应用包，成功后清理布局 |
-| LaunchpadSettingsView / LoginItemController | 外观偏好走AppStorage；登录项以SMAppService.mainApp为事实源，用户切换才注册/注销 |
+| LaunchpadSettingsView / LoginItemController | 外观偏好走AppStorage；提供 Apple 默认布局初始化与最多 3 份自定义布局备份管理；登录项以SMAppService.mainApp为事实源，用户切换才注册/注销 |
 | VisualResourceCache | 串行actor处理图标/壁纸解码与PNG缓存；只向UI交付不可变CGImage，不拥有布局 |
 
 官网模块位于 `apps/website/dist/`，由语义 HTML、CSS、少量渐进增强 JavaScript 和项目自有静态资源组成；根仓库 GitHub Pages 工作流直接发布该目录。页面使用当前客户端真实截图与系统录屏，不在网页内模拟客户端。官网不读取客户端布局、应用目录或偏好，不提供账户、API 或远程控制。
@@ -34,9 +35,15 @@ iLaunchPad 有两个独立交付单元：`apps/ilaunchpad/` 是 macOS GUI 客户
 
 ### 启动、搜索和退出
 
-启动时创建 LayoutStore：读取自身 JSON，失败则尝试 LaunchOS 只读迁移，再失败则建立空布局；归一化后后台扫描，MainActor按最新布局合并；拖拽中延后到提交/取消之后，过期扫描无效。AppDelegate识别系统登录启动事件并仅后台准备；普通启动显示窗口；--import-only 也会初始化并写入布局后退出，不是只读诊断模式。
+启动时创建 LayoutStore：读取自身 JSON，失败则尝试 LaunchOS 只读迁移；两者都不存在时先等待首次完整应用扫描，再按 Apple 默认风格模板生成初始布局。后台扫描与已有布局做完整对账：清除已卸载项、更新名称/路径等元数据，并把新增项追加到最靠前的空位；拖拽中延后到提交/取消之后，过期扫描无效。AppDelegate识别系统登录启动事件并仅后台准备；普通启动显示窗口；--import-only 也会初始化并写入布局后退出，不是只读诊断模式。
 
 唤起选择鼠标所在屏幕，保存原 presentationOptions 并隐藏 Dock；窗口获焦并自动聚焦搜索。搜索索引在后台任务生成，按名称完全相同、前缀、包含、拼音/首字母、Bundle ID 排序。隐藏应用不进索引。NSWorkspace 启动应用后 RootView 关闭启动台；失焦也立即关闭，恢复原 Dock 展示选项。窗口关闭通知会取消拖拽。
+
+### 默认布局与用户备份
+
+Apple 默认布局是内置的确定性初始化规则，不是第 4 份用户快照，也不伪称 Apple 发布了 macOS 26/27 的逐图标清单。工厂优先按历史 LaunchPad 的系统应用类别排序，在首页保留一个“其他”工具文件夹；其余当前已安装应用按稳定顺序继续排列，每页最多 35 个顶层位置。它只在无自有/可自动导入布局时首次生成，或由用户在设置中明确确认后重新初始化当前布局。
+
+用户可命名保存最多 3 份自定义快照，支持覆盖、重命名、删除和恢复。恢复快照前重新扫描应用目录并用同一对账器清除失效项、刷新元数据、追加新项；对账结果写入当前 `layout.json`，不反写已保存快照。成功恢复或默认初始化后，RootView 无动画结束搜索、文件夹、拖拽与编辑状态，回到首页并立即刷新。
 
 ### 页面、文件夹与拖拽
 
@@ -70,7 +77,7 @@ RootView初次实例化当前页与邻页，未访问页保留整屏几何；访
 
 允许卸载的目标必须位于/Applications或当前用户Applications、身份与Bundle一致且文件可删除。NSAlert默认取消，统一说明只把当前应用包移入废纸篓，不清理个人文稿、设置、缓存、共享容器或辅助文件，也不取消订阅。确认后重新解析路径、Bundle ID、可删除性及运行状态；不执行外部卸载器、shell命令或私有卸载API，不提权。
 
-FileManager.trashItem成功才删除布局并执行容器收尾；取消、资格变化、运行中或移动失败均保留布局并反馈。通用外部卸载后的失效项同步仍归DATA-06。
+FileManager.trashItem成功才删除布局并执行容器收尾；取消、资格变化、运行中或移动失败均保留布局并反馈。其他方式卸载应用后，下次目录扫描会从当前布局清除失效项。
 
 ## 安全与跨模块约束
 
@@ -85,9 +92,9 @@ FileManager.trashItem成功才删除布局并执行容器收尾；取消、资�
 | LaunchOS SQLite 文件 | [导入接受定义](../assets/interfaces/launchos-layout-import.md)；第三方拥有源 schema | 客户端只支持 SQL 所列投影；由 spec-001 记录，不保证任意版本 |
 | 旧版 macOS LaunchPad SQLite | [导入接受定义](../assets/interfaces/legacy-launchpad-layout-import.md)；系统拥有源 schema | 只读支持升级遗留的 apps/groups/items 投影，不修改 Dock 数据 |
 | LaunchNext JSON | [导入接受定义](../assets/interfaces/launchnext-layout-import.md)；第三方拥有格式 | 只读支持官方导出的两种 JSON 投影，不读取其 SwiftData 存储 |
-| 自有 JSON | Models.swift Codable 与 LayoutStore 编解码 | 私有存储，无外部消费者；演进约束见 data-model.md |
+| 自有 JSON | Models.swift Codable、LayoutStore 与 LayoutBackupRepository 编解码 | `layout.json` 保存当前布局，`layout-backups.json` 保存最多 3 份用户快照；无外部消费者，演进约束见 data-model.md |
 | macOS API 与 Bundle | Apple SDK、应用 Info.plist | AppKit/SwiftUI/Carbon/CoreImage/SQLite3；最低 26.0，实际打包 arm64 |
 | 自有网络/服务契约 | 不适用 | 无网络服务、外部 SDK 或消息生产者 |
 | 产品官网 | `apps/website/` 静态文件、`.github/workflows/pages.yml` 与冲刺 2 spec-002 | GitHub Pages 独立部署，不读取客户端数据；本地、线上和验收状态分别记录 |
 
-没有生成客户端、Mock 服务或外部契约工具。官网是已存在交付单元的目录归位与事实补录，不改变客户端数据、安全或一致性模型，故不新增 ADR。启动台实现差距见[冲刺 1](../sprints/sp-001-native-launchpad/docs/functional-overview.md)，品牌与官网见[冲刺 2](../sprints/sp-002-brand-and-website/docs/functional-overview.md)。
+没有生成客户端、Mock 服务或外部契约工具。官网是已存在交付单元的目录归位与事实补录，不改变客户端数据、安全或一致性模型，故不新增 ADR。启动台实现差距见[冲刺 1](../sprints/sp-001-native-launchpad/docs/functional-overview.md)，品牌与官网见[冲刺 2](../sprints/sp-002-brand-and-website/docs/functional-overview.md)，默认布局与本地备份见[冲刺 3](../sprints/sp-003-layout-backups/docs/functional-overview.md)。

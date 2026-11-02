@@ -6,13 +6,13 @@ const pageMeta = {
   zh: {
     lang: 'zh-CN',
     title: 'iLaunchPad — 找回 LaunchPad',
-    description: '为 macOS 26、27 带回 LaunchPad：原生液态玻璃、丝滑高刷交互、既有布局导入，以及仅 6.5 MB 的免费 MIT 开源应用。',
+    description: '为 macOS 26、27 带回 LaunchPad：原生液态玻璃、丝滑高刷交互、旧布局导入、Apple 默认布局与 3 份本地备份。',
     button: 'EN'
   },
   en: {
     lang: 'en',
     title: 'iLaunchPad — Bring LaunchPad back',
-    description: 'Bring LaunchPad back to macOS 26 and 27 with native Liquid Glass, fluid interaction, layout import, and a free 6.5 MB MIT-licensed app.',
+    description: 'Bring LaunchPad back to macOS 26 and 27 with native Liquid Glass, fluid interaction, layout import, an Apple-style default, and three local backups.',
     button: '中文'
   }
 };

@@ -13,6 +13,7 @@
 | T09 | 使用系统原生录屏重制分页、搜索、拖拽、文件夹与编辑模式产品演示，并为各功能加入定位缩放与镜头过渡 | requirements | ✅ |
 | T10 | 清理嵌套仓库与工具专属托管残留，使用主仓库 GitHub Pages 工作流发布 | requirements | ✅ |
 | T11 | 压缩 Hero 并以最新款 MacBook Pro 灵动岛正面原创外框呈现 | requirements | ✅ |
+| T12 | 将 Apple 默认布局初始化、3 份本地备份与应用对账加入中英文官网 | requirements | ✅ |
 
 ## 当前事实
 
@@ -21,6 +22,7 @@
 - v2.3.6 ZIP 实测为 4.6 MB，官网支持中英双语；主入口指向 v2.3.6 Release 与源码仓库。GitHub Pages 由根仓库工作流发布至 `https://toketec.github.io/iLaunchPad/`。
 - 兼容迁移正文准确列出旧版 macOS LaunchPad、LaunchOS 与 LaunchNext；Hero MP4 从 13,279,549 字节压至 8,066,752 字节，并置于原创 CSS MacBook Pro 外框内。
 - 采集前的原布局已备份；当前初始化首页保留“其他”文件夹和一个空位，按用户要求暂不恢复。
+- 布局亮点现同时覆盖旧数据只读导入、无旧数据默认初始化、3 份本地快照与切换时应用对账。
 
 ## 跨 spec 依赖
 

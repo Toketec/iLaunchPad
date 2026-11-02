@@ -1,7 +1,9 @@
+import AppKit
 import SwiftUI
 
 struct LaunchpadSettingsView: View {
     @ObservedObject private var loginItem = LoginItemController.shared
+    @ObservedObject private var layoutStore = LayoutStore.shared
     @AppStorage("iconScale") private var iconScale = 1.0
     @AppStorage("wallpaperBlur") private var wallpaperBlur = 24.0
     @AppStorage("showNames") private var showNames = true
@@ -35,6 +37,69 @@ struct LaunchpadSettingsView: View {
             }
             .formStyle(.grouped)
             .tabItem { Label("外观", systemImage: "paintpalette") }
+
+            Form {
+                Section("Apple 默认布局") {
+                    LabeledContent {
+                        Button("恢复…") { restoreAppleDefaultLayout() }
+                            .disabled(layoutStore.isRestoringLayout)
+                    } label: {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Apple 默认布局")
+                            Text("常用系统应用优先，实用工具归入“其他”，其余应用顺延。")
+                                .font(.caption).foregroundStyle(.secondary)
+                        }
+                    }
+                }
+
+                Section("自定义布局备份（\(layoutStore.layoutBackups.count)/3）") {
+                    if layoutStore.layoutBackups.isEmpty {
+                        Text("还没有自定义布局备份")
+                            .foregroundStyle(.secondary)
+                    } else {
+                        ForEach(layoutStore.layoutBackups) { backup in
+                            HStack(spacing: 12) {
+                                VStack(alignment: .leading, spacing: 3) {
+                                    Text(backup.name)
+                                    Text(backup.updatedAt.formatted(date: .abbreviated, time: .shortened))
+                                        .font(.caption).foregroundStyle(.secondary)
+                                }
+                                Spacer()
+                                Button("切换") { restoreBackup(backup) }
+                                    .disabled(layoutStore.isRestoringLayout)
+                                Menu {
+                                    Button("用当前布局覆盖…") { overwriteBackup(backup) }
+                                    Button("重命名…") { renameBackup(backup) }
+                                    Divider()
+                                    Button("删除…", role: .destructive) { deleteBackup(backup) }
+                                } label: {
+                                    Image(systemName: "ellipsis.circle")
+                                }
+                                .menuStyle(.borderlessButton)
+                                .disabled(layoutStore.isRestoringLayout)
+                            }
+                        }
+                    }
+                    Button("备份当前布局…", systemImage: "plus") { createBackup() }
+                        .disabled(!layoutStore.canCreateLayoutBackup)
+                    if layoutStore.layoutBackups.count >= LayoutBackupRepository.maximumCount {
+                        Text("已达到 3 份自定义布局上限。")
+                            .font(.caption).foregroundStyle(.secondary)
+                    }
+                }
+
+                if layoutStore.isRestoringLayout {
+                    Section {
+                        HStack(spacing: 10) {
+                            ProgressView().controlSize(.small)
+                            Text("正在核对已安装应用并切换布局…")
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
+            }
+            .formStyle(.grouped)
+            .tabItem { Label("布局", systemImage: "square.grid.3x3") }
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 18) {
@@ -111,5 +176,68 @@ struct LaunchpadSettingsView: View {
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
             loginItem.refresh()
         }
+    }
+
+    private func createBackup() {
+        guard let name = promptForName(title: "备份当前布局", message: "为这份布局输入名称：",
+                                       defaultValue: "布局 \(layoutStore.layoutBackups.count + 1)") else { return }
+        layoutStore.createLayoutBackup(named: name)
+    }
+
+    private func renameBackup(_ backup: LayoutBackupSummary) {
+        guard let name = promptForName(title: "重命名布局", message: "输入新的布局名称：",
+                                       defaultValue: backup.name) else { return }
+        layoutStore.renameLayoutBackup(id: backup.id, name: name)
+    }
+
+    private func overwriteBackup(_ backup: LayoutBackupSummary) {
+        guard confirm(title: "覆盖“\(backup.name)”？",
+                      message: "将用当前启动台布局替换这份备份。此操作无法撤销。",
+                      action: "覆盖") else { return }
+        layoutStore.overwriteLayoutBackup(id: backup.id)
+    }
+
+    private func restoreBackup(_ backup: LayoutBackupSummary) {
+        guard confirm(title: "切换到“\(backup.name)”？",
+                      message: "当前布局将被这份备份替换。尚未备份的整理结果会丢失。",
+                      action: "切换") else { return }
+        layoutStore.restoreLayoutBackup(id: backup.id)
+    }
+
+    private func deleteBackup(_ backup: LayoutBackupSummary) {
+        guard confirm(title: "删除“\(backup.name)”？",
+                      message: "只删除这份布局备份，不改变当前启动台布局。",
+                      action: "删除") else { return }
+        layoutStore.deleteLayoutBackup(id: backup.id)
+    }
+
+    private func restoreAppleDefaultLayout() {
+        guard confirm(title: "恢复 Apple 默认布局？",
+                      message: "当前布局将被重新初始化。建议先备份当前布局；已有自定义备份不会被删除。",
+                      action: "恢复") else { return }
+        layoutStore.restoreAppleDefaultLayout()
+    }
+
+    private func promptForName(title: String, message: String, defaultValue: String) -> String? {
+        let field = NSTextField(string: defaultValue)
+        field.frame = NSRect(x: 0, y: 0, width: 300, height: 24)
+        let alert = NSAlert()
+        alert.messageText = title
+        alert.informativeText = message
+        alert.accessoryView = field
+        alert.addButton(withTitle: "保存")
+        alert.addButton(withTitle: "取消")
+        guard alert.runModal() == .alertFirstButtonReturn else { return nil }
+        return field.stringValue
+    }
+
+    private func confirm(title: String, message: String, action: String) -> Bool {
+        let alert = NSAlert()
+        alert.messageText = title
+        alert.informativeText = message
+        alert.alertStyle = .warning
+        alert.addButton(withTitle: action)
+        alert.addButton(withTitle: "取消")
+        return alert.runModal() == .alertFirstButtonReturn
     }
 }

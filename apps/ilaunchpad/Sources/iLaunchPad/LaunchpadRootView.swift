@@ -173,6 +173,26 @@ struct LaunchpadRootView: View {
             dragging = nil
             store.isEditing = false
         }
+        .onReceive(NotificationCenter.default.publisher(for: .launchpadLayoutRestored)) { _ in
+            var transaction = Transaction(animation: nil)
+            transaction.disablesAnimations = true
+            withTransaction(transaction) {
+                searchText = ""
+                openFolderID = nil
+                folderExpanded = false
+                folderClosing = false
+                folderBackgroundGroups = [:]
+                selectedIndex = nil
+                folderSelection = nil
+                dragging = nil
+                store.isEditing = false
+                currentPage = 0
+                clampPage()
+                updatePagingEligibility()
+            }
+            resourceEpoch += 1
+            focusRequest += 1
+        }
     }
 
     private var inputHandlers: some View {
