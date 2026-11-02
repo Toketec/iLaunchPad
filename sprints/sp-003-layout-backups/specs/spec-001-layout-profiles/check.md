@@ -12,6 +12,10 @@
 
 > 针对性测试文件已补齐，但当前 Swift 工具链缺少 `Testing` 模块，`swift test --filter LayoutBackupTests` 无法进入测试执行；不得把 release 编译当作单元测试通过。
 
+## 发布证据
+
+功能提交为 `2918d99`，v2.3.7/build 16 发布提交与标签目标为 `ddcc39e` / `v2.3.7`。release 构建和 ad-hoc 签名通过并安装到 `/Applications/iLaunchPad.app`；ZIP 为 4,612,481 字节，SHA-256 为 `ce737d170e20f16bc4d8abcd750a99bd71c63dfc657745002ebfc04567332335`。GitHub Release 已公开，官网同步展示默认布局初始化、3 份本地备份和切换对账能力；Pages run `41385833692` 成功，公开页面与 ZIP 均已核对可访问。发布成功不代替下方人工交互验收。
+
 ## 人工验收
 
 - [ ] 设置可直观区分 Apple 默认初始化与自定义备份恢复。
